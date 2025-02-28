@@ -4,17 +4,24 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "test": "ts-node tests/index.ts",
     "prepare": "npm run build",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/server.js"
+
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.56.0",
@@ -22,7 +29,9 @@
     "@langchain/langgraph": "^0.2.34",
     "@langchain/openai": "^0.3.16",
     "bignumber.js": "^9.1.2",
-    "dotenv": "^16.4.7"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
   },
   "repository": {
     "type": "git",
