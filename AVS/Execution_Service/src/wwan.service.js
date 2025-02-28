@@ -6,11 +6,11 @@ const wwanConfig = require('../configs/WWAN.config.js');
 
 
 // Initialize Ethereum provider and contract
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-const wwanContract = new ethers.Contract(wwanConfig.ADDRESS, wwanConfig.ABI, provider);
+const provider = new ethers.JsonRpcProvider(wwanConfig.RPC_URL);
+const wwanContract = new ethers.Contract(wwanConfig.WWAN_ADDRESS, wwanConfig.WWAN_ABI, provider);
 const attestationCenterContract = new ethers.Contract(
-  process.env.ATTESTATION_CENTER_ADDRESS,
-  process.env.ATTESTATION_CENTER_CONTRACT_ABI,
+  wwanConfig.ATTESTATION_CENTER_ADDRESS,
+  wwanConfig.ATTESTATION_CENTER_ABI,
   provider
 );
 
@@ -791,6 +791,44 @@ async function initialize() {
   }
 }
 
+// Register agent for user with blockchain transaction using operator key
+async function registerAgentForUserOnChain(userId, agentId, allowance) {
+  try {
+    // Use the operator's private key from environment variables
+    const operatorPrivateKey = wwanConfig.PRIVATE_KEY_PERFORMER;
+    if (!operatorPrivateKey) {
+      throw new Error("Operator private key not configured");
+    }
+    
+    // Create a wallet from the operator's private key
+    const wallet = new ethers.Wallet(operatorPrivateKey, provider);
+    
+    // Connect to the contract with the wallet
+    const contractWithSigner = wwanContract.connect(wallet);
+    
+    // Call the contract function to register agent for another user
+    console.log(`Registering agent ${agentId} for user ${userId} with allowance ${allowance}`);
+    const tx = await contractWithSigner.registerAgentForOtherUser(userId, agentId, allowance);
+    
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait();
+    console.log(`Transaction confirmed: ${tx.hash}`);
+    
+    // Also store in Redis for quick lookup
+    await registerAgentForUser(userId, agentId, allowance);
+    
+    return {
+      success: true,
+      transactionHash: tx.hash,
+      blockNumber: receipt.blockNumber,
+      message: `Agent ${agentId} registered for user ${userId} with allowance ${allowance}`
+    };
+  } catch (error) {
+    console.error(`Error registering agent for user on chain: ${error.message}`);
+    throw error;
+  }
+}
+
 module.exports = {
   initialize,
   getAgents,
@@ -802,6 +840,7 @@ module.exports = {
   sendMessage,
   searchAgents,
   registerAgentForUser,
+  registerAgentForUserOnChain,
   getUserAgents,
   executeAgentTask,
   registerTask,

@@ -71,7 +71,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
 
     // Agent Registration
     function registerAgent(string memory _metadata, bytes32[] memory _supportedTaskTypes) 
-        external 
+        public 
     {
         require(!agents[msg.sender].isActive, "Agent already registered");
         
@@ -89,7 +89,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
     }
 
     // Register agent for a user
-    function registerAgentForUser(address _agentAddress, uint256 _paymentAllowance) external {
+    function registerAgentForUser(address _agentAddress, uint256 _paymentAllowance) public {
         require(agents[_agentAddress].isActive, "Agent not registered in system");
         require(!userAgents[msg.sender].isRegistered[_agentAddress], "Agent already registered for user");
         
@@ -109,13 +109,34 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
         emit AgentRegisteredForUser(msg.sender, _agentAddress, _paymentAllowance);
     }
 
+    // Register agent for another user
+    function registerAgentForOtherUser(address _user, address _agentAddress, uint256 _paymentAllowance) public {
+        require(agents[_agentAddress].isActive, "Agent not registered in system");
+        require(!userAgents[_user].isRegistered[_agentAddress], "Agent already registered for user");
+        
+        // Transfer payment allowance to contract
+        if (_paymentAllowance > 0) {
+            require(
+                paymentToken.transferFrom(_user, address(this), _paymentAllowance),
+                "Payment allowance transfer failed"
+            );
+        }
+        
+        UserAgentRegistry storage registry = userAgents[_user];
+        registry.activeAgents.push(_agentAddress);
+        registry.isRegistered[_agentAddress] = true;
+        registry.paymentAllowance[_agentAddress] = _paymentAllowance;
+        
+        emit AgentRegisteredForUser(_user, _agentAddress, _paymentAllowance);
+    }
+
     // Task Creation
     function createTask(
         bytes32 _taskType,
         string memory _taskData,
         uint256 _payment,
         address[] memory _collaboratingAgents
-    ) external nonReentrant {
+    ) public nonReentrant {
         require(_payment > 0, "Payment must be positive");
         
         // Transfer payment to contract
@@ -140,7 +161,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
     }
 
     // Task Assignment
-    function assignTask(uint256 _taskId) external {
+    function assignTask(uint256 _taskId) public {
         require(agents[msg.sender].isActive, "Agent not registered");
         Task storage task = tasks[_taskId];
         require(task.status == TaskStatus.Created, "Task not available");
@@ -153,7 +174,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
     }
 
     // Request collaboration with another agent
-    function requestCollaboration(uint256 _taskId, address _collaboratorAgent) external {
+    function requestCollaboration(uint256 _taskId, address _collaboratorAgent) public {
         Task storage task = tasks[_taskId];
         require(task.assignedAgent == msg.sender, "Not assigned agent");
         require(agents[_collaboratorAgent].isActive, "Collaborator not registered");
@@ -174,7 +195,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
     }
 
     // Task Completion with EigenLayer AVS signature
-    function completeTask(uint256 _taskId, bytes memory _signature) external {
+    function completeTask(uint256 _taskId, bytes memory _signature) public {
         Task storage task = tasks[_taskId];
         require(task.assignedAgent == msg.sender, "Not assigned agent");
         require(task.status == TaskStatus.Assigned || task.status == TaskStatus.InProgress, "Invalid task status");
@@ -200,7 +221,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
         bytes32 _taskType, 
         string memory _taskData, 
         uint256 _payment
-    ) external nonReentrant {
+    ) public nonReentrant {
         require(userAgents[msg.sender].isRegistered[_agentAddress], "Agent not registered for user");
         require(agents[_agentAddress].supportedTaskTypes[_taskType], "Task type not supported by agent");
         

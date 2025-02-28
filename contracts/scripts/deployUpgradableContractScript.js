@@ -19,7 +19,7 @@ async function main () {
 
   const deployHelpers = await getDeployHelpers();
 
-  await deployUpgradableContract(hre, deployHelpers.chainId, "WWANProtocol", deployHelpers.payDeployer, ["0x0000000000000000000000000000000000000000"])
+  await deployUpgradableContract(hre, deployHelpers.chainId, "WWANProtocol", deployHelpers.payDeployer, ["0x3C2929a096a2fB83Ab09984a7349a02Ea4B52dE1"])
 }
 
 main().catch((error) => {

@@ -27,6 +27,27 @@ router.get("/agents", async (req, res) => {
   }
 });
 
+// Register agent for user with blockchain transaction using operator key
+router.post("/users/:userId/agents/onchain", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { agentId, allowance } = req.body;
+    
+    if (!agentId || allowance === undefined) {
+      return res.status(400).send(new CustomError("Missing required fields", {}));
+    }
+    
+    const result = await wwanService.registerAgentForUserOnChain(userId, agentId, allowance);
+    return res.status(201).send(new CustomResponse(result));
+  } catch (error) {
+    console.error(error);
+    if (error.message.includes("insufficient funds")) {
+      return res.status(400).send(new CustomError("Insufficient funds for transaction", {}));
+    }
+    return res.status(500).send(new CustomError("Something went wrong", { error: error.message }));
+  }
+});
+
 // Get agent by ID
 router.get("/agents/:id", async (req, res) => {
   try {
@@ -99,23 +120,7 @@ router.get("/tasks/:id", async (req, res) => {
   }
 });
 
-// Register agent for user
-router.post("/users/:userId/agents", async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { agentId, allowance } = req.body;
-    
-    if (!agentId || allowance === undefined) {
-      return res.status(400).send(new CustomError("Missing required fields", {}));
-    }
-    
-    const result = await wwanService.registerAgentForUser(userId, agentId, allowance);
-    return res.status(201).send(new CustomResponse(result));
-  } catch (error) {
-    console.error(error);
-    return res.status(500).send(new CustomError("Something went wrong", {}));
-  }
-});
+
 
 // Get user's agents
 router.get("/users/:userId/agents", async (req, res) => {
