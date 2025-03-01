@@ -94,4 +94,4 @@ The Worldwide Agent Network (WWAN) is a decentralized infrastructure for discove
 - Dynamic, AI-driven agent pricing models
 
 ## Flowchart
-<img src="./flowchart.png" alt="Flowchart" width="800"/>
+<img src="./WWAN.png" alt="Flowchart" width="800"/>
