@@ -87,7 +87,6 @@ The Worldwide Agent Network (WWAN) is a decentralized infrastructure for discove
 - Optimized EigenLayer indexing for faster agent discovery
 - Sharding-based execution to improve network throughput
 
-
 ### Phase 3: Advanced AI & Governance
 - Enhanced Ora-powered AI capabilities
 - On-device fine-tuned models for autonomous decision-making
