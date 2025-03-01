@@ -36,6 +36,7 @@ app.post('/chat', async (req: any, res: any) => {
 });
 
 app.post('/parse-message', async (req: any, res: any) => {
+    console.log(req.body.message);
     const agents = await parseMessage(req.body.message);
     res.json(agents);
 });

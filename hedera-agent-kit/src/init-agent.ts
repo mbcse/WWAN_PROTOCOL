@@ -7,6 +7,8 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import axios from 'axios';
 import { Agent } from './types/agents';
 
+const EIGENLAYER_AVS_URL = "http://localhost:4003/task/";
+
 let Agent: any, Config: any;
 
 // Initialize agent
@@ -68,9 +70,9 @@ export const fetchMessages = async (message: string) => {
 };
 
 export const fetchAgentListFromAvs = async () => {
-    const url = "https://localhost:5000/v1/agents";
+    const url = `${EIGENLAYER_AVS_URL}/agents`;
     const agents = await axios.get(url);
-    return agents.data as Agent[];
+    return agents.data as any[];
 }
 
 export const parseMessage = async (message: string) => {
@@ -80,9 +82,9 @@ export const parseMessage = async (message: string) => {
         apiKey: process.env.OPENAI_API_KEY || "",
     });
 
-    const agents = await fetchAgentListFromAvs();
+    const agents: any = await fetchAgentListFromAvs();
 
-    const combined = agents.map(agent => `${agent.name} (${agent.id}): ${agent.description}`).join(", ");
+    const combined = agents.data.map((agent: any) => `${agent.name} (${agent.id}): ${agent.description} ${agent.address}`).join(", ");
 
     const systemMessage = `
     You are an analytical AI agent specialized in matching user queries to available AI agents.
@@ -96,6 +98,7 @@ export const parseMessage = async (message: string) => {
     ["agent_id1", "agent_id2", "agent_id3"]
     
     Only include agents that have a meaningful match to the query. Sort results by match confidence in descending order. If no suitable agents are found, return an empty matchingAgents array and suggest alternatives in the recommendedAction field.
+    If nothing matches or you dont have a good response then reply with []. there should be no other response.
     `;
 
     const response = await llm.invoke([
@@ -106,14 +109,14 @@ export const parseMessage = async (message: string) => {
     // Parse the response content to extract agent IDs
     let matchingAgentIds: string[];
     try {
-        matchingAgentIds = JSON.parse(response as any);
+        matchingAgentIds = JSON.parse(response.content as any);
     } catch (error) {
         console.error("Failed to parse LLM response:", error);
         return [];
     }
 
     // Filter agents to only include those that match the returned IDs
-    const matchingAgents = agents.filter(agent => 
+    const matchingAgents = agents.data.filter((agent: any) => 
         matchingAgentIds.includes(agent.id)
     );
 
