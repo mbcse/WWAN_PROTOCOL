@@ -41,7 +41,7 @@ app.post('/parse-message', async (req: any, res: any) => {
 });
 
 // Define port
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3006;
 
 // Start server
 app.listen(PORT, () => {

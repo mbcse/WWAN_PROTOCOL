@@ -8,6 +8,8 @@ export const mint_nft = async (
     tokenMetadata: Uint8Array<ArrayBufferLike>,
     client: Client
 ): Promise<MintNFTResult> => {
+
+    console.log(tokenId, tokenMetadata, client)
     const tx = await new TokenMintTransaction()
         .setTokenId(tokenId)
         .addMetadata(tokenMetadata)

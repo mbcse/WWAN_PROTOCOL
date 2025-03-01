@@ -373,14 +373,14 @@ module.exports = {
         {
             "inputs": [
                 {
+                    "internalType": "address",
+                    "name": "_agentAddress",
+                    "type": "address"
+                },
+                {
                     "internalType": "string",
                     "name": "_metadata",
                     "type": "string"
-                },
-                {
-                    "internalType": "bytes32[]",
-                    "name": "_supportedTaskTypes",
-                    "type": "bytes32[]"
                 }
             ],
             "name": "registerAgent",

@@ -48,6 +48,32 @@ router.post("/users/:userId/agents/onchain", async (req, res) => {
   }
 });
 
+// Send message to agent
+router.post("/agents/:agentId/message", async (req, res) => {
+  const { agentId } = req.params;
+  const { message, signature } = req.body;
+  
+  console.log(`Sending message to agent: ${agentId}`);
+  
+  if (!message || !signature) {
+    return res.status(400).send(new CustomError("Message and signature are required", {}));
+  }
+  
+  try {
+    const result = await wwanService.sendMessage(agentId, message, signature);
+    return res.status(200).send(new CustomResponse(result, "Message sent successfully"));
+  } catch (error) {
+    console.error(`Error sending message: ${error.message}`);
+    if (error.message.includes("not found")) {
+      return res.status(404).send(new CustomError("Agent not found", { agentId }));
+    }
+    if (error.message.includes("Invalid signature")) {
+      return res.status(401).send(new CustomError("Invalid signature", {}));
+    }
+    return res.status(500).send(new CustomError("Failed to send message", { error: error.message }));
+  }
+});
+
 // Get agent by ID
 router.get("/agents/:id", async (req, res) => {
   try {
@@ -152,31 +178,7 @@ router.post("/users/:userId/agents/:agentId/execute", async (req, res) => {
   }
 });
 
-// Send message to agent
-router.post("/agents/:agentId/message", async (req, res) => {
-  const { agentId } = req.params;
-  const { message, signature } = req.body;
-  
-  console.log(`Sending message to agent: ${agentId}`);
-  
-  if (!message || !signature) {
-    return res.status(400).send(new CustomError("Message and signature are required", {}));
-  }
-  
-  try {
-    const result = await wwanService.sendMessage(agentId, message, signature);
-    return res.status(200).send(new CustomResponse(result, "Message sent successfully"));
-  } catch (error) {
-    console.error(`Error sending message: ${error.message}`);
-    if (error.message.includes("not found")) {
-      return res.status(404).send(new CustomError("Agent not found", { agentId }));
-    }
-    if (error.message.includes("Invalid signature")) {
-      return res.status(401).send(new CustomError("Invalid signature", {}));
-    }
-    return res.status(500).send(new CustomError("Failed to send message", { error: error.message }));
-  }
-});
+
 
 // Get agent's inbox
 router.get("/agents/:agentId/inbox", async (req, res) => {

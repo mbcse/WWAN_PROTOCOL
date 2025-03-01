@@ -73,7 +73,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
     function registerAgent(address _agentAddress, string memory _metadata) 
         public 
     {
-        require(!agents[msg.sender].isActive, "Agent already registered");
+        require(!agents[_agentAddress].isActive, "Agent already registered");
         
         Agent storage newAgent = agents[_agentAddress];
         newAgent.agentAddress = _agentAddress;
@@ -81,7 +81,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
         newAgent.isActive = true;
         newAgent.reputation = 100; // Base reputation
 
-        emit AgentRegistered(msg.sender, _metadata);
+        emit AgentRegistered(_agentAddress, _metadata);
     }
 
     // Register agent for a user

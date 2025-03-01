@@ -79,8 +79,15 @@ async function publishJSONToIpfs(data) {
 
 
 async function getIpfsData(cid) {
-  const { data } = await axios.get(ipfsHost + '/ipfs/' + cid);
-  return data;
+  console.log("Getting IPFS data for cid:", cid);
+  try{
+    const { data } = await axios.get(ipfsHost + '/ipfs/' + cid);
+    console.log("IPFS data:", data);
+    return data;
+  }catch(error) {
+    console.error("Error fetching IPFS data:", error);
+  }
+  
 }  
   
 

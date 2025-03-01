@@ -66,29 +66,35 @@ export class WWANCall extends Tool {
 
   description = `Make a call to Eigenlayer WWAN protocol api
 Inputs ( input is a JSON string ):
-name: string, the name of the token e.g. My Token,
-symbol: string, the symbol of the token e.g. MT,
-maxSupply: number, the max supply of the token e.g. 100000,
-isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
-isAdminKey: boolean, decides whether admin key should be set, false if not passed
-memo: string, containing memo associated with this token, empty string if not passed
-tokenMetadata: string, containing metadata associated with this token, empty string if not passed
+prompt: string, the description of the image to generate,
+type: string, the type of operation (e.g., "image_generation")
 `
 
   constructor() {
     super()
   }
 
-  protected async _call(input: string): Promise<string> {
+   async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
+      console.log(parsedInput)
+      
+
+      if (parsedInput.type === "image_generation" && parsedInput.prompt) {
+        const mockImageHash = `ipfs://${Buffer.from(parsedInput.prompt).toString('base64').substring(0, 46)}`;
+        console.log(mockImageHash)
+        return JSON.stringify({
+          status: "success",
+          message: "Image generation successful",
+          imageHash: mockImageHash,
+          prompt: parsedInput.prompt
+        });
+      }
 
       return JSON.stringify({
         status: "success",
         message: "WWAN call successful",
-        initialSupply: parsedInput.initialSupply,
-        // tokenId: tokenId.toString(),
-        // solidityAddress: tokenId.toSolidityAddress(),
+        // Add other fields as needed
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -102,7 +108,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
 
 // FIXME: works well in isolation but normally usually createFT is called instead of createNFT
 export class HederaCreateNonFungibleTokenTool extends Tool {
-  name = 'hedera_create_fungible_token'
+  name = 'hedera_create_nft'
 
   description = `Create a non fungible (NFT) token on Hedera
 Inputs ( input is a JSON string ):
@@ -112,16 +118,95 @@ maxSupply: number, the max supply of the token e.g. 100000,
 isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
 isAdminKey: boolean, decides whether admin key should be set, false if not passed
 memo: string, containing memo associated with this token, empty string if not passed
+imagePrompt: string, a description of the image you want to generate for this NFT (manadatory)
 tokenMetadata: string, containing metadata associated with this token, empty string if not passed
+For image generation, provide an imagePrompt and the tool will automatically generate an image using WWAN.
 `
 
-  constructor(private hederaKit: HederaAgentKit) {
+  constructor(private hederaKit: HederaAgentKit, private llm?: OpenAIChat) {
     super()
   }
 
   protected async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
+      let metadata = parsedInput.tokenMetadata || "";
+      console.log("hello")
+      // If imagePrompt is provided, use WWAN to generate an image
+      console.log(parsedInput.imagePrompt)
+      if (parsedInput.imagePrompt) {
+        try {
+          console.log("Creating WWAN tool for image generation");
+          
+          // Create message for the WWAN agent
+          const message = {
+            type: "image_generation",
+            prompt: parsedInput.imagePrompt,
+            timestamp: Date.now()
+          };
+          
+          // Convert message to string
+          const messageStr = JSON.stringify(message);
+          
+          // Import ethers
+          const { ethers } = require('ethers');
+          
+          // Create wallet from private key
+          const privateKey = process.env.AGENT_PRIVATE_KEY;
+          if (!privateKey) {
+            throw new Error("HEDERA_PRIVATE_KEY environment variable is not set");
+          }
+          
+          // Create wallet
+          const wallet = new ethers.Wallet(privateKey);
+          
+          // Sign the message
+          const signature = await wallet.signMessage(messageStr);
+          
+          // Make API call to WWAN service
+          const axios = require('axios');
+          const response = await axios.post(
+            `http://localhost:4003/task/agents/${process.env.WWAN_AGENT_ID || "0x8137147256EF84caea5322C4A9BE7209f0709dd7"}/message`,
+            {
+              message: messageStr,
+              signature: signature,
+              walletAddress: wallet.address
+            }
+          );
+          
+          console.log("WWAN API response:", response.data);
+          
+          if (response.data && response.data.data) {
+            // Add the image hash to the metadata
+            const metadataObj = metadata ? JSON.parse(metadata) : {};
+            metadataObj.image = response.data.data.imageHash || response.data.data.result?.imageHash;
+            metadataObj.imagePrompt = parsedInput.imagePrompt;
+            metadata = JSON.stringify(metadataObj);
+          }
+        } catch (apiError: any) {
+          console.error("WWAN API call failed:", apiError.message);
+          // Fall back to the WWANCall tool if API call fails
+          console.log("Falling back to WWANCall tool");
+          const wwanTool = new WWANCall();
+          const wwanInput = JSON.stringify({
+            prompt: parsedInput.imagePrompt,
+            type: "image_generation"
+          });
+          const wwanResponse = await wwanTool._call(wwanInput);
+          console.log("WWAN response:", wwanResponse);
+          
+          const wwanResult = JSON.parse(wwanResponse);
+          console.log("Parsed WWAN result:", wwanResult);
+          
+          if (wwanResult.status === "success" && wwanResult.imageHash) {
+            // Add the image hash to the metadata
+            const metadataObj = metadata ? JSON.parse(metadata) : {};
+            metadataObj.image = wwanResult.imageHash;
+            metadataObj.imagePrompt = parsedInput.imagePrompt;
+            metadata = JSON.stringify(metadataObj);
+          }
+        }
+      }
 
       const tokenId = (await this.hederaKit.createNFT({
         name: parsedInput.name,
@@ -130,7 +215,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
         isAdminKey: parsedInput.isAdminKey,
         isMetadataKey: parsedInput.isMetadataKey,
         memo: parsedInput.memo,
-        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata),
+        tokenMetadata: new TextEncoder().encode(metadata),
       })).tokenId;
 
       return JSON.stringify({
@@ -139,6 +224,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
         initialSupply: parsedInput.initialSupply,
         tokenId: tokenId.toString(),
         solidityAddress: tokenId.toSolidityAddress(),
+        metadata: metadata
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -988,13 +1074,13 @@ Example usage:
 }
 
 
-export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
+export function createHederaTools(hederaKit: HederaAgentKit, llm?: OpenAIChat): Tool[] {
   return [
     new HederaCreateFungibleTokenTool(hederaKit),
     new HederaTransferTokenTool(hederaKit),
     new HederaGetBalanceTool(hederaKit),
     new HederaAirdropTokenTool(hederaKit),
-    new HederaCreateNonFungibleTokenTool(hederaKit),
+    new HederaCreateNonFungibleTokenTool(hederaKit, llm),
     new HederaGetHtsBalanceTool(hederaKit),
     new HederaAssociateTokenTool(hederaKit),
     new HederaDissociateTokenTool(hederaKit),

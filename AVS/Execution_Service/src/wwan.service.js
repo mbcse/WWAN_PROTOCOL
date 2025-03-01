@@ -3,6 +3,7 @@ const axios = require("axios");
 const { ethers } = require("ethers");
 const redisClient = require('../redis/redis.js');
 const wwanConfig = require('../configs/WWAN.config.js');
+const { getIpfsData, publishJSONToIpfs } = require('./dal.service.js');
 
 
 // Initialize Ethereum provider and contract
@@ -92,10 +93,12 @@ async function initEventListeners() {
 
 // Helper function to fetch data from IPFS
 async function fetchFromIPFS(ipfsHash) {
+  console.log("ipfsHash", ipfsHash)
   try {
     const content = await getIpfsData(ipfsHash);
     return content;
   } catch (error) {
+    console.log(error)
     console.error(`Error fetching from IPFS: ${error.message}`);
     throw error;
   }
@@ -287,18 +290,6 @@ async function sendMessage(agentId, message, senderSignature) {
       throw new Error(`Agent ${agentId} not found`);
     }
     
-    // Verify signature using attestation center contract
-    const messageHash = ethers.utils.hashMessage(JSON.stringify(message));
-    const isValid = await attestationCenterContract.verifySignature(
-      message.sender,
-      messageHash,
-      senderSignature
-    );
-    
-    if (!isValid) {
-      throw new Error('Invalid signature');
-    }
-    
     // Store message on IPFS
     const messageWithTimestamp = {
       ...message,
@@ -318,26 +309,60 @@ async function sendMessage(agentId, message, senderSignature) {
       status: 'delivered'
     }));
     
-    // Add to recipient's inbox
-    const inboxKey = `inbox:${agentId}`;
-    const inbox = JSON.parse(await redisClient.getStringKey(inboxKey) || '[]');
-    inbox.push(messageId);
-    await redisClient.pushStringToRedisWithKey(inboxKey, JSON.stringify(inbox));
+    // Get agent data
+    const agentData = JSON.parse(agentJson);
     
-    // Submit to EigenLayer AVS via Othentic
-    const avsResponse = await othentic.submitTask({
-      taskId: messageId,
-      taskType: 'agent_message',
-      recipient: agentId,
-      data: JSON.stringify(messageWithTimestamp),
-      callbackUrl: `${process.env.AVS_CALLBACK_URL}/api/wwan/messages/${messageId}/status`
-    });
+    // Create a task on the WWAN contract
+    const wallet = new ethers.Wallet(wwanConfig.PRIVATE_KEY_PERFORMER, provider);
+    const contractWithSigner = wwanContract.connect(wallet);
     
+    // Convert message type to bytes32
+    const taskType = ethers.utils.formatBytes32String(message.type || "message");
+    
+    // Create task on the contract
+    console.log(`Creating task on WWAN contract for agent ${agentId}`);
+    const tx = await contractWithSigner.createTask(
+      taskType,
+      ipfsHash,
+      ethers.utils.parseEther("0.01"), // Small payment amount
+      [] // No collaborating agents for now
+    );
+    
+    // Wait for transaction to be mined
+    const receipt = await tx.wait();
+    console.log(`Task created on chain: ${tx.hash}`);
+    
+    // Get the task ID from events
+    const taskCreatedEvent = receipt.events.find(e => e.event === "TaskCreated");
+    const taskId = taskCreatedEvent.args.taskId.toString();
+    
+    // Call the agent's endpoint if available
+    let agentResponse = null;
+    if (agentData.metadata.callEndpointUrl) {
+      try {
+        const response = await fetch(agentData.metadata.callEndpointUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(messageWithTimestamp)
+        });
+
+        agentResponse = await response.json();
+        console.log(`Agent response:`, agentResponse);
+      } catch (error) {
+        console.error(`Error calling agent endpoint: ${error.message}`);
+      }
+    }
+
     return {
       success: true,
       messageId: messageId,
       ipfsHash: ipfsHash,
-      avsResponse: avsResponse
+      taskId: taskId,
+      transactionHash: tx.hash,
+      blockNumber: receipt.blockNumber,
+      agentResponse: agentResponse
     };
   } catch (error) {
     console.error(`Error sending message: ${error.message}`);
