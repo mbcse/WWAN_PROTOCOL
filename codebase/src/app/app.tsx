@@ -16,12 +16,13 @@ export function App() {
     }, [authenticated]);
   
   return (
-    <div>
+    <div className="min-h-screen bg-[#1E1E1E] text-white">
+    {authenticated && <div className="min-h-screen bg-[#1E1E1E] text-white">
       <Navbar />
       {/* <NxWelcome title="codebase" /> */}
       <Homepage />
       <Toaster />
-    </div>
+    </div>}</div>
   );
 }
 

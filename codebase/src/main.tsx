@@ -16,8 +16,11 @@ root.render(
         loginMethods: ['email', 'wallet'],
         // Customize Privy's appearance in your app
         appearance: {
+          landingHeader: 'Access the World Wide Agent Network',
+          logo: "/wwan_logo.png",
           theme: 'light',
           accentColor: '#676FFF',
+          showWalletLoginFirst: true,
         },
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {

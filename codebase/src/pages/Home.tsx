@@ -43,9 +43,9 @@ const Homepage = () => {
             {/* <img src="/wwan_header.png" alt="WWAN Logo" className="absolute top-0 left-0 opacity-80 h-screen z-0" /> */}
             <div className="mb-8">
                 <h1 className="text-center">
-                    <span className="text-3xl font-bold">WWAN Protocol: The OnChain Agent Network</span>
-                    <span className="block text-xl mt-2">Discover and Communicate with Agents Directly On-Chain</span>
-                    <span className="block text-sm mt-1 text-gray-600">Evolving from WWW to WWAN</span>
+                    <span className="text-3xl font-bold">WWAN Protocol: The World Wide Agent Network</span>
+                    <span className="block text-xl mt-2">Discovery and Inter Agent Communication Protocol</span>
+                    <span className="block text-sm mt-1 text-gray-600">Evolving from www to WWAN</span>
                 </h1>
             </div>
 

@@ -23,13 +23,36 @@ interface MessageType {
     }
 }
 
+const STATUS_MSGS = [
+    " is searching the World Wide Agent Network.....",
+    " found an Image Generating Agent in the wild",
+    " has negotiated the cost per call is 0.02 WWAN",
+    " has received the image generation hash. Now minting the NFT ..."
+
+];
+
 function ChatApp({ agent }: { agent: Agent }) {
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [isTyping, setIsTyping] = useState(false);
+    const [statusMsgCount, setStatusMsgCount] = useState(0);
+    const [statusMsg, setStatusMsg] = useState(STATUS_MSGS[0]);
 
     useEffect(() => {
         loadMessages();
     }, []);
+
+    useEffect(() => {
+        // if (isTyping) {
+            const interval = setInterval(() => {
+                if (statusMsgCount === 3) {
+                    setStatusMsg(STATUS_MSGS[0]);
+                    interval && clearInterval(interval);
+                }
+                setStatusMsg(STATUS_MSGS[statusMsgCount]);
+                setStatusMsgCount(statusMsgCount === 3 ? 0 : statusMsgCount + 1);
+            }, 2000);
+        // }
+    }, [agent]);
 
     const loadMessages = () => {
         const storedMessages = localStorage.getItem(`wwan:${agent?.address}:chatMessages`);
@@ -85,7 +108,8 @@ function ChatApp({ agent }: { agent: Agent }) {
         // 2. Call the API and handle the response
         try {
             setIsTyping(true); // Show typing indicator while waiting
-            const response = await sendChatMessage(`${agent?.metadata?.description}. Your skills are ${agent?.metadata?.skillList.join(', ')}. Using the above description and skills, respond to the following message: ${messageText}`);
+            // const response = await sendChatMessage(`${agent?.metadata?.description}. Your skills are ${agent?.metadata?.skillList.join(', ')}. Using the above description and skills, respond to the following message: ${messageText}`);
+            const response = await sendChatMessage(`${messageText}`);
 
             console.log(response);
 
@@ -157,7 +181,7 @@ function ChatApp({ agent }: { agent: Agent }) {
                     </div>
                 </div>
                 <div className="w-full"> {/* Container for fixed positioning */}
-                    {isTyping && <TypingIndicator className='!text-black' content={`${agent?.metadata?.name} is searching the World Wide Agent Network.....`} />}
+                    {isTyping && <TypingIndicator className='!text-black' content={`${agent?.metadata?.name} ${statusMsg}`} />}
                 </div>
             </div>
 

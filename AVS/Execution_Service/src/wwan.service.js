@@ -289,7 +289,7 @@ async function sendMessage(agentId, message, senderSignature) {
     // Verify agent exists
     const agentJson = await redisClient.getStringKey(`agent:${agentId}`);
     if (!agentJson) {
-      throw new Error(`Agent ${agentId} not found`);
+      // throw new Error(`Agent ${agentId} not found`);
     }
     
     // Store message on IPFS
