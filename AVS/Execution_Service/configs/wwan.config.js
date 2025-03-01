@@ -549,5 +549,8 @@ module.exports = {
     ATTESTATION_CENTER_ADDRESS: process.env.ATTESTATION_CENTER_ADDRESS || "0x0000000000771A79D0Fc7F3B7FE270eB4498F20b",
     ATTESTATION_CENTER_ABI: [],
     AVS_GOVERNANCE_ADDRESS: process.env.AVS_GOVERNANCE_ADDRESS || "0x0000000000771A79D0Fc7F3B7FE270eB4498F20b",
-    RPC_URL: process.env.RPC_URL || "https://base-sepolia-rpc.publicnode.com"
+    RPC_URL: process.env.RPC_URL || "https://base-sepolia-rpc.publicnode.com",
+    STORY_RPC_PROVIDER_URL: process.env.STORY_RPC_PROVIDER_URL || "https://aeneid.storyrpc.io",
+    NFT_CONTRACT_ADDRESS: process.env.NFT_CONTRACT_ADDRESS || "0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc",
+    STORY_PROTOCOL_ADDRESS: process.env.STORY_PROTOCOL_ADDRESS || "0x5FbDB2315678afecb367f032d93F642f64180aa3",
 }

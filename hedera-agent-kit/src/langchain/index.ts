@@ -120,7 +120,6 @@ isAdminKey: boolean, decides whether admin key should be set, false if not passe
 memo: string, containing memo associated with this token, empty string if not passed
 imagePrompt: string, a description of the image you want to generate for this NFT (manadatory)
 tokenMetadata: string, containing metadata associated with this token, empty string if not passed
-For image generation, provide an imagePrompt and the tool will automatically generate an image using WWAN.
 `
 
   constructor(private hederaKit: HederaAgentKit, private llm?: OpenAIChat) {
