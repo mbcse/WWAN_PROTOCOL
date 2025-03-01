@@ -15,6 +15,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import speechService from '@/components/custom/TextToSpeech';
+import { useWallets } from '@privy-io/react-auth';
+import { getContractFunctions } from '@/web3';
+import { toast } from 'sonner';
 
 // Define types
 interface CardType {
@@ -73,6 +76,7 @@ const cards: CardType[] = [
 const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setShowAgents }) => {
   const [voices, setVoices] = useState<VoiceOption[]>([]);
   const [api, setApi] = useState<CarouselApi>()
+  const { wallets } = useWallets();
 
   const [selectedCardIds, setSelectedCardIds] = useState<number[]>([]);
 
@@ -98,15 +102,15 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
     setSelectedCardIds(prev => prev.filter(cardId => cardId !== id));
   };
 
-  const handleConfirmSelection = (): void => {
+  const handleConfirmSelection = async () => {
     setShowAgents(false);
     if (onSelect && selectedCardIds.length > 0) {
       onSelect(getSelectedCards());
-      // const provider = await wallets[0].getEthereumProvider();
-      // const { approveWWAN } = await getContractFunctions(provider);
-      // const tx = await approveWWAN(1000000000000000000);
-      // toast(`Agent Registered successfully!! Transaction hash: ${tx.hash}`);
-      
+
+      const provider = await wallets[0].getEthereumProvider();
+      const { approveWWAN } = await getContractFunctions(provider);
+      const tx = await approveWWAN(1000000000000000000);
+      toast(`Agent Registered successfully!! Transaction hash: ${tx.hash}`);
     }
   };
 
