@@ -103,15 +103,17 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
   };
 
   const handleConfirmSelection = async () => {
-    setShowAgents(false);
-    if (onSelect && selectedCardIds.length > 0) {
+    // if (onSelect && selectedCardIds.length > 0) {
+    if (onSelect) {
       onSelect(getSelectedCards());
+    }
 
       const provider = await wallets[0].getEthereumProvider();
       const { approveWWAN } = await getContractFunctions(provider);
-      const tx = await approveWWAN(1000000000000000000);
+      const tx = await approveWWAN("10000000000000000");
       toast(`Agent Registered successfully!! Transaction hash: ${tx.hash}`);
-    }
+      setShowAgents(false);
+    // }
   };
 
   const handleCancel = (): void => {
