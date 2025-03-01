@@ -13,7 +13,7 @@ use types::{
 
 mod types;
 
-const VETKD_SYSTEM_API_CANISTER_ID: &str = "s55qq-oqaaa-aaaaa-aaakq-cai"; // Replace with the actual canister ID
+const VETKD_SYSTEM_API_CANISTER_ID: &str = "s55qq-oqaaa-aaaaa-aaakq-cai";
 
 #[derive(Serialize, Deserialize)]
 struct Context {
@@ -23,22 +23,16 @@ struct Context {
 
 #[update]
 async fn store_and_send_private_key(encryption_public_key: Vec<u8>) -> String {
-    // 1. Get encrypted private key from VetKD
-
     let encrypted_key_result =
         encrypted_ibe_decryption_key_for_caller(encryption_public_key).await;
 
-    // 2. Prepare data for external POST request
-
     match encrypted_key_result {
         Ok(encrypted_key_hex) => {
-            // Construct the JSON payload
             let json_string = format!(
                 r#"{{"encrypted_private_key": "{}"}}"#,
                 encrypted_key_hex
             );
 
-            // Send HTTP POST request
             let result = send_http_post_request(json_string).await;
             result
         }
@@ -46,10 +40,8 @@ async fn store_and_send_private_key(encryption_public_key: Vec<u8>) -> String {
     }
 }
 
-// Modified to accept the JSON string directly
 async fn send_http_post_request(json_string: String) -> String {
-    let host = "putsreq.com";
-    let url = "https://putsreq.com/aL1QS5IbaQd4NTqN3a81"; // Replace with the actual API endpoint
+    let url = "http://localhost:3000/api/keys";
 
     let request_headers = vec![
         HttpHeader {
@@ -58,7 +50,7 @@ async fn send_http_post_request(json_string: String) -> String {
         },
         HttpHeader {
             name: "Idempotency-Key".to_string(),
-            value: "UUID-123456789".to_string(), // Should be generated dynamically
+            value: "UUID-678028328".to_string(),
         },
         HttpHeader {
             name: "Content-Type".to_string(),
@@ -90,7 +82,7 @@ async fn send_http_post_request(json_string: String) -> String {
             ic_cdk::api::print(format!("{:?}", str_body));
 
             let result: String = format!(
-                "{}. See more info of the request sent at: {}/inspect",
+                "{}. Request sent to: {}",
                 str_body, url
             );
             result
@@ -103,7 +95,6 @@ async fn send_http_post_request(json_string: String) -> String {
     }
 }
 
-// Strips all data that is not needed from the original response.
 #[query]
 fn transform(raw: TransformArgs) -> HttpResponse {
     let headers = vec![
