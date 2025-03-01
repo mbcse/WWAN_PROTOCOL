@@ -86,14 +86,9 @@ The Worldwide Agent Network (WWAN) is a decentralized infrastructure for discove
 ### Phase 2: Scalability
 - Optimized EigenLayer indexing for faster agent discovery
 - Sharding-based execution to improve network throughput
-- Layer 2 integration for reduced gas costs
 
-### Phase 3: Interoperability
-- Cross-chain support via blockchain bridges
-- Integration with Cosmos IBC, Polkadot, and LayerZero
-- Standardized cross-chain agent communication protocol
 
-### Phase 4: Advanced AI & Governance
+### Phase 3: Advanced AI & Governance
 - Enhanced Ora-powered AI capabilities
 - On-device fine-tuned models for autonomous decision-making
 - DAO-based governance for protocol upgrades
