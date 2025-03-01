@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, Search } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea"
+import speechService from '@/components/custom/TextToSpeech';
+
+interface VoiceOption {
+    gender: 'male' | 'female';
+    index: number;
+    name: string;
+  }
 
 const Homepage = () => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [voices, setVoices] = useState<VoiceOption[]>([]);
 
     const handleSearch = () => {
         if (searchQuery.trim()) {
             console.log('Searching for:', searchQuery);
-            // Here you would typically implement your actual search functionality
-            alert(`Searching for: ${searchQuery}`);
+            speechService.speak(`${searchQuery}`, {
+                voiceName: 'Samantha'
+            })
         }
     };
 
@@ -19,6 +28,25 @@ const Homepage = () => {
             handleSearch();
         }
     };
+
+    useEffect(() => {
+        speechService.initialize().then(() => {
+            const categories = speechService.getVoiceCategories();
+
+            // Create voice options from categories
+            const voiceOptions: VoiceOption[] = [];
+
+            categories.male.forEach((name, index) => {
+                voiceOptions.push({ gender: 'male', index, name });
+            });
+
+            categories.female.forEach((name, index) => {
+                voiceOptions.push({ gender: 'female', index, name });
+            });
+
+            setVoices(voiceOptions);
+        });
+    }, []);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
