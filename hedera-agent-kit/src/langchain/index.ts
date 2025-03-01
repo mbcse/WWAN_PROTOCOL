@@ -154,7 +154,7 @@ For image generation, provide an imagePrompt and the tool will automatically gen
           // Create wallet from private key
           const privateKey = process.env.AGENT_PRIVATE_KEY;
           if (!privateKey) {
-            throw new Error("HEDERA_PRIVATE_KEY environment variable is not set");
+            throw new Error("AGENT_PRIVATE_KEY environment variable is not set");
           }
           
           // Create wallet

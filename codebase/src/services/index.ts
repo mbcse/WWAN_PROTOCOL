@@ -10,7 +10,8 @@ export const sendChatMessage = async (message: string, aiUrl = API_URL) => {
         const response = await axios.post(`${aiUrl}/chat`, {
             message,
         });
-        return response.data;
+        const data = response.data;
+        return data.response;
     } catch (error) {
         console.error('Error sending chat message:', error);
         throw error;

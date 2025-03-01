@@ -19,6 +19,7 @@ import { useWallets } from '@privy-io/react-auth';
 import { getContractFunctions } from '@/web3';
 import { toast } from 'sonner';
 import { Agent } from '@/types';
+import { set } from 'zod';
 
 // Define types
 interface CardType {
@@ -34,6 +35,8 @@ interface CardType {
 interface CardSelectorProps {
   onSelect?: (selectedCards: Agent[]) => void;
   onCancel?: () => void;
+  setDepositMade: (deposit: boolean) => void;
+  setSelectedAgent: (agent: Agent) => void;
   agents: Agent[];
   setShowAgents: (show: boolean) => void;
 }
@@ -75,7 +78,7 @@ const cards: CardType[] = [
   }
 ];
 
-const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setShowAgents, agents }) => {
+const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setShowAgents, agents, setDepositMade, setSelectedAgent }) => {
   const [voices, setVoices] = useState<VoiceOption[]>([]);
   const [api, setApi] = useState<CarouselApi>()
   const { wallets } = useWallets();
@@ -97,7 +100,9 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
   };
 
   const getSelectedCards = (): Agent[] => {
-    return agents.filter(card => selectedCardIds.includes(card.address));
+    const selected = agents.filter(card => selectedCardIds.includes(card.address));
+    setSelectedAgent(selected[0]);
+    return selected;
   };
 
   const removeSelectedCard = (id: string): void => {
@@ -114,6 +119,7 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
       const { approveWWAN } = await getContractFunctions(provider);
       const tx = await approveWWAN("10000000000000000");
       toast(`Agent Registered successfully!! Transaction hash: ${tx.hash}`);
+      setDepositMade(true);
       setShowAgents(false);
     // }
   };
@@ -126,9 +132,9 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
     }
   };
 
-  const playAudio = (card: any) => {
-    speechService.speak(`Hi I am ${card.name}. ${card.description}`, {
-      voiceName: card.voiceName
+  const playAudio = (agent: Agent) => {
+    speechService.speak(`Hi I am ${agent.metadata.name}. ${agent.metadata.description}`, {
+      voiceName: voices[0].name
     })
   };
 

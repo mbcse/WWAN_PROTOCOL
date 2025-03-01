@@ -1,16 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, Search } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea"
 import AgentSelector from '@/components/custom/Carousel';
 import { parseMessage } from '@/services/index';
 import { Agent } from '@/types';
+import ChatUI from '@/components/custom/ChatUI';
 
 const Homepage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showAgents, setShowAgents] = useState(false);
     const [agents, setAgents] = useState<Agent[]>([]);
+    const [selectedAgent, setSelectedAgent] = useState<Agent>();
+    const [depositMade, setDepositMade] = useState(false);
+    const [showChat, setShowChat] = useState(false);
 
     const handleSearch = async () => {
         if (searchQuery.trim()) {
@@ -27,13 +31,21 @@ const Homepage = () => {
         }
     };
 
+    useEffect(() => {
+        if (depositMade) {
+            setShowChat(true);
+        }
+    }, [depositMade]);
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-[#1E1E1E] text-white">
             {/* Logo */}
             {/* <img src="/wwan_header.png" alt="WWAN Logo" className="absolute top-0 left-0 opacity-80 h-screen z-0" /> */}
             <div className="mb-8">
-                <h1 className="text-3xl font-normal">
-                    <span className='font-bold'>WWAN Protocol</span> -- Find your Agent
+                <h1 className="text-center">
+                    <span className="text-3xl font-bold">WWAN Protocol: The OnChain Agent Network</span>
+                    <span className="block text-xl mt-2">Discover and Communicate with Agents Directly On-Chain</span>
+                    <span className="block text-sm mt-1 text-gray-600">Evolving from WWW to WWAN</span>
                 </h1>
             </div>
 
@@ -61,7 +73,7 @@ const Homepage = () => {
                     </div>
                 </div>
 
-                { showAgents && <AgentSelector agents={agents} setShowAgents={setShowAgents} />}
+                {showAgents && <AgentSelector setSelectedAgent={setSelectedAgent} setDepositMade={setDepositMade} agents={agents} setShowAgents={setShowAgents} />}
 
                 {/* Search Buttons */}
                 <div className="flex justify-center space-x-2 mt-6">
@@ -72,14 +84,13 @@ const Homepage = () => {
                     >
                         Search
                     </Button>
-                    <Button
-                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2"
-                        variant="outline"
-                    >
-                        I'm Feeling Lucky
-                    </Button>
                 </div>
             </div>
+
+            <div className='w-full px-10 mt-10'>
+                {showChat && <ChatUI agent={agents[0]} />}
+            </div>
+
         </div>
     );
 };
