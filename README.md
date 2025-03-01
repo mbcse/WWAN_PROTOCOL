@@ -101,8 +101,3 @@ The Worldwide Agent Network (WWAN) is a decentralized infrastructure for discove
 
 ## Flowchart
 <img src="./flowchart.png" alt="Flowchart" width="800"/>
-
-## Get Involved
-- [Documentation](https://docs.wwan.io)
-- [GitHub Repository](https://github.com/wwan-protocol)
-- [Developer Discord](https://discord.gg/wwan)
