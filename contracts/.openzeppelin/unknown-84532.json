@@ -309,6 +309,308 @@
         },
         "namespaces": {}
       }
+    },
+    "08a4d108f1307d246a10211ccca089554cc1ab18de52bb0d7d30e096d1344e9c": {
+      "address": "0x4cF1aa7E7bE67Dc0391D67259ae495D7bC49C51b",
+      "txHash": "0x78523eea25c322897e94b3ed12bcf4a0fa9ef422f9a1615d0dd88c3cd18ed0d3",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:38"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:88"
+          },
+          {
+            "label": "owner",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_address",
+            "contract": "WWANProtocol",
+            "src": "contracts/WWANProtocol.sol:11"
+          },
+          {
+            "label": "paymentToken",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_contract(IERC20Upgradeable)831",
+            "contract": "WWANProtocol",
+            "src": "contracts/WWANProtocol.sol:12"
+          },
+          {
+            "label": "agents",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_mapping(t_address,t_struct(Agent)1301_storage)",
+            "contract": "WWANProtocol",
+            "src": "contracts/WWANProtocol.sol:47"
+          },
+          {
+            "label": "tasks",
+            "offset": 0,
+            "slot": "154",
+            "type": "t_mapping(t_uint256,t_struct(Task)1320_storage)",
+            "contract": "WWANProtocol",
+            "src": "contracts/WWANProtocol.sol:48"
+          },
+          {
+            "label": "userAgents",
+            "offset": 0,
+            "slot": "155",
+            "type": "t_mapping(t_address,t_struct(UserAgentRegistry)1332_storage)",
+            "contract": "WWANProtocol",
+            "src": "contracts/WWANProtocol.sol:49"
+          },
+          {
+            "label": "taskCounter",
+            "offset": 0,
+            "slot": "156",
+            "type": "t_uint256",
+            "contract": "WWANProtocol",
+            "src": "contracts/WWANProtocol.sol:50"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes_storage": {
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20Upgradeable)831": {
+            "label": "contract IERC20Upgradeable",
+            "numberOfBytes": "20"
+          },
+          "t_enum(TaskStatus)1338": {
+            "label": "enum WWANProtocol.TaskStatus",
+            "members": [
+              "Created",
+              "Assigned",
+              "InProgress",
+              "Completed",
+              "Disputed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Agent)1301_storage)": {
+            "label": "mapping(address => struct WWANProtocol.Agent)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(UserAgentRegistry)1332_storage)": {
+            "label": "mapping(address => struct WWANProtocol.UserAgentRegistry)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Task)1320_storage)": {
+            "label": "mapping(uint256 => struct WWANProtocol.Task)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Agent)1301_storage": {
+            "label": "struct WWANProtocol.Agent",
+            "members": [
+              {
+                "label": "agentAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "metadata",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isActive",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "reputation",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "supportedTaskTypes",
+                "type": "t_mapping(t_bytes32,t_bool)",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(Task)1320_storage": {
+            "label": "struct WWANProtocol.Task",
+            "members": [
+              {
+                "label": "creator",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "assignedAgent",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "taskType",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "taskData",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "payment",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "status",
+                "type": "t_enum(TaskStatus)1338",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "signature",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "collaboratingAgents",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(UserAgentRegistry)1332_storage": {
+            "label": "struct WWANProtocol.UserAgentRegistry",
+            "members": [
+              {
+                "label": "activeAgents",
+                "type": "t_array(t_address)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "isRegistered",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "paymentAllowance",
+                "type": "t_mapping(t_address,t_uint256)",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
     }
   }
 }

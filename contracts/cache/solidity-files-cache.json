@@ -493,8 +493,8 @@
       ]
     },
     "/Users/mohit/Desktop/MYPERSONAL/HACKATHONS2025/ETHDENVER/WWAN_PROTOCOL/contracts/contracts/WWANProtocol.sol": {
-      "lastModificationDate": 1740783807050,
-      "contentHash": "587b39b9e9d50cc2855d7237fb92f7ab",
+      "lastModificationDate": 1740797365378,
+      "contentHash": "dbabbfeefbecae8a3ce06096beb92f79",
       "sourceName": "contracts/WWANProtocol.sol",
       "solcConfig": {
         "version": "0.8.17",
