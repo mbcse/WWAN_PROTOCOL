@@ -3,6 +3,9 @@ import { ethers } from 'ethers';
 import { WWANPROTOCOL as abi } from './abi/contractABIData.json';
 import addresses from './abi/contractAddresses.json';
 
+import { ERC20 as erc20abi } from './abi/contractABIData.json';
+
+
 const contractAddress = addresses["84532"]["WWANPROTOCOL"];
 
 // A single function to get all contract functions
@@ -11,11 +14,16 @@ export const getContractFunctions = async (provider: any) => {
     const ethersProvider = new ethers.BrowserProvider(provider);
     const signer = await ethersProvider.getSigner();
     const contract = new ethers.Contract(contractAddress, abi, signer);
+    const erc20Contract = new ethers.Contract("0x3C2929a096a2fB83Ab09984a7349a02Ea4B52dE1", erc20abi, signer);
     
     return {
       // View Functions
       async getAgent(agentAddress: string) {
         return await contract.agents(agentAddress);
+      },
+
+      async approveWWAN(amount: ethers.BigNumberish) {
+        return await erc20Contract.approve(contractAddress, amount);
       },
       async getTask(taskId: number) {
         return await contract.tasks(taskId);
