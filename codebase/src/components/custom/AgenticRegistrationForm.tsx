@@ -14,7 +14,6 @@ interface AgentRegistrationFormProps {
 }
 
 const AgentRegistrationForm = ({ onSubmit }: AgentRegistrationFormProps) => {
-    const { user } = usePrivy();
     const { wallets } = useWallets()
     const [imageUrl, setImageUrl] = useState<string>("");
     

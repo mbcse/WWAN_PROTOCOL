@@ -85,7 +85,7 @@ function ChatApp({ agent }: { agent: Agent }) {
         // 2. Call the API and handle the response
         try {
             setIsTyping(true); // Show typing indicator while waiting
-            const response = await sendChatMessage(messageText);
+            const response = await sendChatMessage(`${agent?.metadata?.description}. Your skills are ${agent?.metadata?.skillList.join(', ')}. Using the above description and skills, respond to the following message: ${messageText}`);
 
             console.log(response);
 
@@ -116,24 +116,24 @@ function ChatApp({ agent }: { agent: Agent }) {
 
             //Handle error scenario
             const errorMessage: MessageType = {
-              id: Date.now().toString(), // Different ID for the AI message
-              createdAt: new Date(),
-              model: {
-                  message: "Sorry, I encountered an error processing your request.",
-                  sender: 'them',
-                  direction: 'incoming',
-                  position: 'single',
-                  type: 'text'
-              },
-              user: {
-                  name: agent?.metadata?.name || 'AI Agent',
-                  avatarSrc: agent?.metadata?.imageUrl || '/agent1.png'
-              }
-          };
+                id: Date.now().toString(), // Different ID for the AI message
+                createdAt: new Date(),
+                model: {
+                    message: "Sorry, I encountered an error processing your request.",
+                    sender: 'them',
+                    direction: 'incoming',
+                    position: 'single',
+                    type: 'text'
+                },
+                user: {
+                    name: agent?.metadata?.name || 'AI Agent',
+                    avatarSrc: agent?.metadata?.imageUrl || '/agent1.png'
+                }
+            };
 
-          const updatedMessages = [...newMessages, errorMessage];
-          setMessages(updatedMessages);
-          saveMessageLocally(updatedMessages);
+            const updatedMessages = [...newMessages, errorMessage];
+            setMessages(updatedMessages);
+            saveMessageLocally(updatedMessages);
 
         } finally {
             setIsTyping(false); // Hide typing indicator after response
@@ -148,20 +148,27 @@ function ChatApp({ agent }: { agent: Agent }) {
     return (
         <div className='h-[500px] w-full flex flex-col'>
             {/* Header Section */}
-            <div className="bg-gray-700 p-4 rounded-t-lg">
-                <h2 className="text-lg font-semibold">Chat with AI Agent</h2>
-                <p className="text-sm text-gray-300">Ask any questions you have.</p>
+            <div className="bg-gray-700 p-4 rounded-t-lg flex flex-col gap-2">
+                <div className='flex flex-row gap-2'>
+                    <img src={agent?.metadata?.imageUrl} alt="Agent Avatar" className="w-10 h-10 rounded-full mr-2" />
+                    <div className='flex flex-col gap-2 items-start'>
+                        <h2 className="text-lg font-semibold">Chat with {agent?.metadata?.name}</h2>
+                        <p className="text-sm text-gray-300">{agent?.metadata?.description}</p>
+                    </div>
+                </div>
+                <div className="w-full"> {/* Container for fixed positioning */}
+                    {isTyping && <TypingIndicator className='!text-black' content={`${agent?.metadata?.name} is searching the World Wide Agent Network.....`} />}
+                </div>
             </div>
 
             <MainContainer className='rounded-b-lg flex-grow'>
                 <ChatContainer className='rounded-b-lg'>
-                    <MessageList className='!bg-[#121212] rounded-b-lg pt-4'>
+                    <MessageList className='!bg-[#121212] rounded-b-lg pt-4 relative'>
                         {messages.map((message, index) => (
                             <Message key={message.id} model={message.model}>
                                 <Avatar src={message.user?.avatarSrc} name={message.user?.name} size="md" />
                             </Message>
                         ))}
-                        {isTyping && <TypingIndicator content="Bot is typing" />}
                     </MessageList>
                     <MessageInput placeholder="Type message here" onSend={handleSend} />
                 </ChatContainer>

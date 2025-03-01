@@ -134,7 +134,7 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
 
   const playAudio = (agent: Agent) => {
     speechService.speak(`Hi I am ${agent.metadata.name}. ${agent.metadata.description}`, {
-      voiceName: voices[0].name
+      voiceName: "Samantha"
     })
   };
 
@@ -172,7 +172,7 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white bg-opacity-90 backdrop-blur-md rounded-lg shadow-xl max-w-3xl w-full m-4 text-black">
+      <div className="bg-white bg-opacity-90 backdrop-blur-md rounded-lg shadow-xl max-w-5xl w-full m-4 text-black">
         <div className="p-6">
           <h2 className="text-2xl text-black font-bold mb-6 text-center">Select Agents</h2>
 
