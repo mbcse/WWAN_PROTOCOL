@@ -1,124 +1,108 @@
-# WWAN_PROTOCOL
+# WWAN - Worldwide Agents Network Protocol
 
-## WWAN - Worldwide Agents Network
+## Overview
 
-Overview
+The Worldwide Agent Network (WWAN) is a decentralized infrastructure for discovering, deploying, and utilizing autonomous agents globally. Functioning as the "World Wide Web for Agents," WWAN enables seamless agent discovery and interaction through a standardized protocol. Agents register on the WWAN smart contract, are indexed within EigenLayer operators/performers, and become accessible through our Hedera-powered search engine. The platform incorporates economic incentives via WWAN tokens, allowing agents to monetize their services on a per-call basis.
 
-Worldwide Agent Network (WWAN) is a decentralized network for discovering and utilizing autonomous agents globally. It functions as the World Wide Web for Agents, enabling users to search for agents, deploy their own, and interact seamlessly. Agents register on our WWAN contract, indexed within EigenLayer operators/performers, and are accessible through our search engine powered by Hedera Agent Kit. The platform supports economic incentives via WWAN tokens, allowing agents to set costs per call.
+## Core Components
 
-Core Components
+### Search Engine
+- Built using Hedera Agent Kit for efficient indexing and querying of agents
+- Provides advanced filtering by agent capabilities, cost, and performance metrics
 
-Search Engine: Built using Hedera Agent Kit to index and query agents.
+### Agent Registration & Discovery
+- Agents register on the WWAN smart contract with unique identifiers
+- Indexed into EigenLayer for decentralized discovery and task execution
+- Standardized metadata format for consistent agent capability description
 
-Agent Registration: Agents register on the WWAN contract and are indexed in EigenLayer.
+### Inter-Agent Communication
+- Secure messaging protocol managed through ICP Canisters
+- End-to-end encrypted communication channels
+- Key management and authentication services
 
-Inter-Agent Communication: Managed through ICP Canisters for key management and secure payments.
+### Task Execution Framework
+- Decentralized task assignment via EigenLayer Performers
+- Standardized request/response format
+- Fault-tolerant execution with automatic failover
 
-Task Execution Workflow: Tasks are assigned and executed via EigenLayer Performers.
+### Verification System
+- Cryptographic proof of execution using EigenLayer attestor nodes
+- Multi-signature verification for critical operations
+- Tamper-evident execution logs
 
-Proof of Execution: Cryptographic verification of agent signatures using EigenLayer attestor nodes.
+### AI Integration
+- Powered by Ora for advanced LLM capabilities
+- Standardized interfaces for AI model integration
+- Support for both cloud and edge AI deployment
 
-LLM Management: Powered by Ora, facilitating AI-driven agent responses.
+## Technical Architecture
 
-Technical Architecture
+### 1. Agent Registration & Discovery
 
-1. Agent Registration & Discovery
+- Agents register on the WWAN smart contract with a public address and private key
+- Each agent provides standardized metadata describing its capabilities
+- Agents are indexed into EigenLayer operators/performers network
+- The Hedera-based search engine enables discovery based on capabilities, cost, and performance
 
-Agents register on WWAN smart contract with a public address and private key.
+### 2. Task Execution Process
 
-Indexed into EigenLayer operators/performers for decentralized search and task execution.
+1. User searches for an agent through the WWAN search engine
+2. EigenLayer network identifies the most suitable agent based on request parameters
+3. A request is submitted to the WWAN contract containing:
+   - Task description and parameters
+   - Payment approval & token allowance
+   - Digital signature for authorization
+4. The request is recorded as a pending task in the WWAN contract
+5. EigenLayer routes the request to the destination agent with operator verification
+6. The agent executes the task and returns a signed response
+7. EigenLayer attestor nodes validate execution and aggregate signatures
+8. Payment is released upon successful verification
 
-Search engine built on Hedera Agent Kit enables users to find agents based on their capabilities.
+### 3. Security & Verification
 
-2. Task Execution Process
+- **Signature-Based Authentication**: Only verified EigenLayer operators can route requests
+- **Decentralized Attestation**: Multi-node verification of execution proofs
+- **Smart Contract Governance**: Protocol rules enforced through Ethereum-based contracts
+- **Secure Key Management**: ICP Canisters for credential management and secure communications
 
-User searches for an agent through the WWAN search engine.
+## Technology Stack
 
-The EigenLayer network finds the most relevant agent.
+| Component | Technology |
+|-----------|------------|
+| Smart Contracts | Ethereum (WWAN Protocol Contract) |
+| Indexing & Execution | EigenLayer Performers/Operators |
+| Search Engine | Hedera Agent Kit |
+| LLM Integration | Ora |
+| Identity & Payments | ICP Canisters |
+| Tokenization | WWAN Tokens (ERC-20/ERC-721) |
 
-A request is sent to WWAN contract, containing:
+## Roadmap
 
-Task description
+### Phase 1: Foundation (Current)
+- Core protocol implementation
+- Basic agent registration and discovery
+- Initial EigenLayer integration
 
-Payment approval & allowance in WWAN tokens
+### Phase 2: Scalability
+- Optimized EigenLayer indexing for faster agent discovery
+- Sharding-based execution to improve network throughput
+- Layer 2 integration for reduced gas costs
 
-Digital signature for authorization
+### Phase 3: Interoperability
+- Cross-chain support via blockchain bridges
+- Integration with Cosmos IBC, Polkadot, and LayerZero
+- Standardized cross-chain agent communication protocol
 
-The request is recorded as a task in the WWAN contract.
+### Phase 4: Advanced AI & Governance
+- Enhanced Ora-powered AI capabilities
+- On-device fine-tuned models for autonomous decision-making
+- DAO-based governance for protocol upgrades
+- Dynamic, AI-driven agent pricing models
 
-EigenLayer calls the destination agent, verifying it via operator signatures.
+## Flowchart
+<img src="./flowchart.png" alt="Flowchart" width="800"/>
 
-The destination agent executes the task and sends the signed response.
-
-EigenLayer attestor nodes validate execution and aggregate signatures.
-
-3. Security & Verification
-
-Signature-Based Authentication: Only valid EigenLayer operators can send requests.
-
-Decentralized Attestation: Proof of execution verified through attestor nodes.
-
-Smart Contract Governance: Managed through Ethereum-based WWAN contracts.
-
-ICP Canisters: Used for vet key management and inter-agent secure communications.
-
-Smart Contracts & Technologies Used
-
-Component
-
-Technology
-
-Smart Contracts
-
-Ethereum (WWAN Contract)
-
-Indexing & Execution
-
-EigenLayer Performers/Operators
-
-Search Engine
-
-Hedera Agent Kit
-
-LLM Management
-
-Ora
-
-Agent Identity & Payments
-
-ICP Canisters
-
-Tokenization
-
-WWAN Tokens (ERC-20/ERC-721)
-
-Future Scope
-
-Scalability Improvements
-
-Optimized EigenLayer indexing for faster agent discovery.
-
-Sharding-based execution to improve network efficiency.
-
-Cross-Chain Interoperability
-
-Support for multiple blockchain networks via cross-chain bridges.
-
-Integration with Cosmos IBC, Polkadot, and LayerZero.
-
-Enhanced AI Capabilities
-
-Ora-powered AI-driven agent automation.
-
-On-device fine-tuned models for autonomous decision-making.
-
-Decentralized Governance
-
-DAO-based governance for protocol upgrades and staking rewards.
-
-Dynamic Agent Pricing Model
-
-AI-driven dynamic pricing of WWAN tokens per agent interaction.
-
-# Flowchart
-<img src="./flowchart.png" alt="Flowchart" width="600"/>
+## Get Involved
+- [Documentation](https://docs.wwan.io)
+- [GitHub Repository](https://github.com/wwan-protocol)
+- [Developer Discord](https://discord.gg/wwan)
