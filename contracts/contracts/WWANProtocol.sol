@@ -70,20 +70,16 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
     }
 
     // Agent Registration
-    function registerAgent(string memory _metadata, bytes32[] memory _supportedTaskTypes) 
+    function registerAgent(address _agentAddress, string memory _metadata) 
         public 
     {
         require(!agents[msg.sender].isActive, "Agent already registered");
         
-        Agent storage newAgent = agents[msg.sender];
-        newAgent.agentAddress = msg.sender;
+        Agent storage newAgent = agents[_agentAddress];
+        newAgent.agentAddress = _agentAddress;
         newAgent.metadata = _metadata;
         newAgent.isActive = true;
         newAgent.reputation = 100; // Base reputation
-
-        for(uint i = 0; i < _supportedTaskTypes.length; i++) {
-            newAgent.supportedTaskTypes[_supportedTaskTypes[i]] = true;
-        }
 
         emit AgentRegistered(msg.sender, _metadata);
     }
@@ -165,7 +161,7 @@ contract WWANProtocol is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradea
         require(agents[msg.sender].isActive, "Agent not registered");
         Task storage task = tasks[_taskId];
         require(task.status == TaskStatus.Created, "Task not available");
-        require(agents[msg.sender].supportedTaskTypes[task.taskType], "Task type not supported");
+        // require(agents[msg.sender].supportedTaskTypes[task.taskType], "Task type not supported");
 
         task.assignedAgent = msg.sender;
         task.status = TaskStatus.Assigned;
