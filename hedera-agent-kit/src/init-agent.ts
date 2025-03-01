@@ -5,9 +5,32 @@ import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import axios from 'axios';
-import { Agent } from './types/agents';
 
 const EIGENLAYER_AVS_URL = "http://localhost:4003/task/";
+
+interface AgentMetadata {
+    name: string;
+    description: string;
+    publickey: string;
+    skillList: string[];
+    callEndpointUrl: string;
+    costPerCall: string;
+    imageUrl: string;
+}
+
+interface AgentType {
+    address: string;
+    isActive: boolean;
+    reputation: number;
+    registeredAt: number;
+    metadata?: AgentMetadata;  // Optional since not all agents have metadata
+}
+
+interface AgentResponse {
+    data: AgentType[];
+    error: boolean;
+    message: null | string;
+}
 
 let Agent: any, Config: any;
 
@@ -72,7 +95,7 @@ export const fetchMessages = async (message: string) => {
 export const fetchAgentListFromAvs = async () => {
     const url = `${EIGENLAYER_AVS_URL}/agents`;
     const agents = await axios.get(url);
-    return agents.data as any[];
+    return agents.data as AgentResponse;
 }
 
 export const parseMessage = async (message: string) => {
@@ -82,9 +105,9 @@ export const parseMessage = async (message: string) => {
         apiKey: process.env.OPENAI_API_KEY || "",
     });
 
-    const agents: any = await fetchAgentListFromAvs();
+    const agents: AgentResponse = await fetchAgentListFromAvs();
 
-    const combined = agents.data.map((agent: any) => `${agent.name} (${agent.id}): ${agent.description} ${agent.address}`).join(", ");
+    const combined = agents.data.map((agent: AgentType) => `${agent.metadata?.name} (${agent.address}): ${agent.metadata?.description}`).join(", ");
 
     const systemMessage = `
     You are an analytical AI agent specialized in matching user queries to available AI agents.
@@ -95,9 +118,9 @@ export const parseMessage = async (message: string) => {
     2. Identify which agents can best address the user's needs based on description similarity
     3. Return a list of ids with matching agents as follows
     
-    ["agent_id1", "agent_id2", "agent_id3"]
+    ["agent 1 address", "agent 2 address", "agent 3 address"]
     
-    Only include agents that have a meaningful match to the query. Sort results by match confidence in descending order. If no suitable agents are found, return an empty matchingAgents array and suggest alternatives in the recommendedAction field.
+    Only include agents that have a meaningful match to the query. Sort results by match confidence in descending order. If no suitable agents are found, return an empty matchingAgents array.
     If nothing matches or you dont have a good response then reply with []. there should be no other response.
     `;
 
@@ -116,8 +139,8 @@ export const parseMessage = async (message: string) => {
     }
 
     // Filter agents to only include those that match the returned IDs
-    const matchingAgents = agents.data.filter((agent: any) => 
-        matchingAgentIds.includes(agent.id)
+    const matchingAgents = agents.data.filter((agent: AgentType) =>
+        matchingAgentIds.includes(agent.address)
     );
 
     // Return the filtered list of matching agents
