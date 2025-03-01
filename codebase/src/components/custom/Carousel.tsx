@@ -29,6 +29,8 @@ interface CardSelectorProps {
 }
 
 const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
+  // const { user } = usePrivy();
+  // const { wallets } = useWallets()
   // Sample card data
   const cards: CardType[] = [
     {
@@ -81,9 +83,14 @@ const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
     setSelectedCardIds(prev => prev.filter(cardId => cardId !== id));
   };
 
-  const handleConfirmSelection = (): void => {
+  const handleConfirmSelection = async (): void => {
     if (onSelect && selectedCardIds.length > 0) {
       onSelect(getSelectedCards());
+      // const provider = await wallets[0].getEthereumProvider();
+      // const { approveWWAN } = await getContractFunctions(provider);
+      // const tx = await approveWWAN(1000000000000000000);
+      // toast(`Agent Registered successfully!! Transaction hash: ${tx.hash}`);
+      
     }
   };
 
