@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ContractRunner, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { WWANPROTOCOL as abi } from './abi/contractABIData.json';
 import addresses from './abi/contractAddresses.json';
 
@@ -30,8 +30,8 @@ export const getContractFunctions = async (provider: any) => {
         return await contract.owner();
       },
       // Write Functions
-      async registerAgent(metadata: string, supportedTaskTypes: string[]) {
-        const tx = await contract.registerAgent(metadata, supportedTaskTypes);
+      async registerAgent(address: string, metadata: string) {
+        const tx = await contract.registerAgent(address, metadata);
         await tx.wait();
         console.log("Agent registered successfully");
         return tx;

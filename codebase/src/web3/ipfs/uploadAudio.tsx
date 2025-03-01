@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import pinata from '@/web3/services/ipfs/pinata'; // Adjust the path as necessary
+import pinata from './pinata'; // Adjust the path as necessary
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 

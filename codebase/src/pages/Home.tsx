@@ -91,7 +91,7 @@ const Homepage = () => {
                         className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2"
                         variant="outline"
                     >
-                        Google Search
+                        Search
                     </Button>
                     <Button
                         className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2"
