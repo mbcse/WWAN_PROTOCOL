@@ -32,7 +32,7 @@ function ChatApp({ agent }: { agent: Agent }) {
     }, []);
 
     const loadMessages = () => {
-        const storedMessages = localStorage.getItem('chatMessages');
+        const storedMessages = localStorage.getItem(`wwan:${agent?.address}:chatMessages`);
         if (storedMessages) {
             setMessages(JSON.parse(storedMessages));
         } else {
@@ -55,7 +55,7 @@ function ChatApp({ agent }: { agent: Agent }) {
     };
 
     const saveMessageLocally = (newMessages: MessageType[]) => {
-        localStorage.setItem('chatMessages', JSON.stringify(newMessages));
+        localStorage.setItem(`wwan:${agent?.address}:chatMessages`, JSON.stringify(newMessages));
     }
 
 
