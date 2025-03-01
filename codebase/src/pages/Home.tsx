@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUp, Search } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea"
 import speechService from '@/components/custom/TextToSpeech';
+import CardSelector from '@/components/custom/Carousel';
 
 interface VoiceOption {
     gender: 'male' | 'female';
@@ -80,6 +81,8 @@ const Homepage = () => {
                         </Button>
                     </div>
                 </div>
+
+                {/* <CardSelector /> */}
 
                 {/* Search Buttons */}
                 <div className="flex justify-center space-x-2 mt-6">

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ethers } from 'ethers';
+import { ContractRunner, ethers } from 'ethers';
 import { WWANPROTOCOL as abi } from './abi/contractABIData.json';
 import addresses from './abi/contractAddresses.json';
 
@@ -8,7 +8,8 @@ const contractAddress = addresses["84532"]["WWANPROTOCOL"];
 // A single function to get all contract functions
 export const getContractFunctions = async (provider: any) => {
   try {
-    const signer = provider.getSigner();
+    const ethersProvider = new ethers.BrowserProvider(provider);
+    const signer = await ethersProvider.getSigner();
     const contract = new ethers.Contract(contractAddress, abi, signer);
     
     return {

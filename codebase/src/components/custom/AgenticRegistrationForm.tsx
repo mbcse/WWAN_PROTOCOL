@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Input } from "@/components/ui/input";
 import ImageUploader from '@/web3/ipfs/uploadImage';
 import { getContractFunctions } from '@/web3/index';
@@ -13,6 +13,7 @@ interface AgentRegistrationFormProps {
 
 const AgentRegistrationForm = ({ onSubmit }: AgentRegistrationFormProps) => {
     const { user } = usePrivy();
+    const { wallets } = useWallets()
     
     const [formData, setFormData] = useState({
         name: '',
@@ -33,8 +34,13 @@ const AgentRegistrationForm = ({ onSubmit }: AgentRegistrationFormProps) => {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        console.log(wallets)
+        const provider = await wallets[0].getEthereumProvider();
+        const { registerAgent } = await getContractFunctions(provider);
+        await registerAgent("", []);
         
         // Convert skillList string to array
         const processedData: any = {

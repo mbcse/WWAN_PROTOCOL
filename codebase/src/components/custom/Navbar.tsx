@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Wallet } from 'lucide-react';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 // Add these imports
 import {
     Dialog,
@@ -14,7 +14,8 @@ import {
 import AgentRegistrationForm from './AgenticRegistrationForm';
 
 const Navbar = () => {
-    const { login, logout, ready, authenticated } = usePrivy();
+    const { login, logout, authenticated } = usePrivy();
+
     const [open, setOpen] = React.useState(false);
 
     const registerAgent = () => {
@@ -52,11 +53,11 @@ const Navbar = () => {
                     <Button className="bg-blue-600 hover:bg-blue-700" onClick={registerAgent}>Register an Agent</Button>
 
                     {/* Connect Wallet Button */}
-                    {authenticated && <Button className="bg-blue-600 hover:bg-blue-700" onClick={login}>
+                    {!authenticated && <Button className="bg-blue-600 hover:bg-blue-700" onClick={login}>
                         <Wallet className="mr-2 h-4 w-4" />
                         Connect Wallet
                     </Button>}
-                    {!authenticated && <Button className="bg-blue-600 hover:bg-blue-700" onClick={logout}>
+                    {authenticated && <Button className="bg-blue-600 hover:bg-blue-700" onClick={logout}>
                         <Wallet className="mr-2 h-4 w-4" />
                         Disconnect
                     </Button>}
