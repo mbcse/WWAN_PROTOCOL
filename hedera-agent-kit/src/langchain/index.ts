@@ -60,6 +60,46 @@ tokenMetadata: string, containing metadata associated with this token, empty str
   }
 }
 
+// TODO: WWAN works well in isolation but normally usually createFT is called instead of createNFT
+export class WWANCall extends Tool {
+  name = 'call_wwan_network'
+
+  description = `Make a call to Eigenlayer WWAN protocol api
+Inputs ( input is a JSON string ):
+name: string, the name of the token e.g. My Token,
+symbol: string, the symbol of the token e.g. MT,
+maxSupply: number, the max supply of the token e.g. 100000,
+isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
+isAdminKey: boolean, decides whether admin key should be set, false if not passed
+memo: string, containing memo associated with this token, empty string if not passed
+tokenMetadata: string, containing metadata associated with this token, empty string if not passed
+`
+
+  constructor() {
+    super()
+  }
+
+  protected async _call(input: string): Promise<string> {
+    try {
+      const parsedInput = JSON.parse(input);
+
+      return JSON.stringify({
+        status: "success",
+        message: "WWAN call successful",
+        initialSupply: parsedInput.initialSupply,
+        // tokenId: tokenId.toString(),
+        // solidityAddress: tokenId.toSolidityAddress(),
+      });
+    } catch (error: any) {
+      return JSON.stringify({
+        status: "error",
+        message: error.message,
+        code: error.code || "UNKNOWN_ERROR",
+      });
+    }
+  }
+}
+
 // FIXME: works well in isolation but normally usually createFT is called instead of createNFT
 export class HederaCreateNonFungibleTokenTool extends Tool {
   name = 'hedera_create_fungible_token'
@@ -970,6 +1010,7 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaDeleteTopicTool(hederaKit),
     new HederaSubmitTopicMessageTool(hederaKit),
     new HederaGetTopicInfoTool(hederaKit),
-    new HederaGetTopicMessagesTool(hederaKit)
+    new HederaGetTopicMessagesTool(hederaKit),
+    new WWANCall(),
   ]
 }

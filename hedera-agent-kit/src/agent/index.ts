@@ -63,6 +63,11 @@ export default class HederaAgentKit {
     this.client = Client.forNetwork(network).setOperator(accountId, privateKey)
   }
 
+  // TODO: WWAN Setup Eigenlayer AVS APi here
+  async signWWANCall(options: any) {
+
+  }
+
   async createFT(options: CreateFTOptions): Promise<CreateTokenResult> {
     return create_token({
       ...options,
