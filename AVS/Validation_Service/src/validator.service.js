@@ -3,6 +3,8 @@ const dalService = require("./dal.service");
 const oracleService = require("./oracle.service");
 const signatureValidator = require("./signature.validator");
 const redisClient = require('../../Execution_Service/redis/redis.js');
+const wwanConfig = require('../../Execution_Service/configs/WWAN.config.js');
+const { ethers } = require("ethers");
 
 async function validate(proofOfTask) {
   try {
@@ -21,19 +23,10 @@ async function validate(proofOfTask) {
   }
 }
 
-/**
- * Validates a task and its result, then generates an EigenLayer proof
- * @param {string} taskId - The task ID
- * @param {string} ipfsHash - The IPFS hash of the task result
- * @param {string} agentId - The agent's address
- * @param {string} signature - The agent's signature
- * @returns {Promise<Object>} - The validation result and proof
- */
 async function validateTaskAndGenerateProof(taskId, ipfsHash, agentId, signature) {
   try {
-    console.log(`Validating task ${taskId} and generating proof`);
+    console.log(`Validating task ${taskId} and generating proof for agent ${agentId}`);
     
-    // First validate the task result
     const validationResult = await signatureValidator.validateTaskResult(
       taskId, ipfsHash, agentId, signature
     );
@@ -42,12 +35,10 @@ async function validateTaskAndGenerateProof(taskId, ipfsHash, agentId, signature
       throw new Error("Task validation failed");
     }
     
-    // Fetch the task result from IPFS
     const taskResult = await dalService.getIPfsTask(ipfsHash);
     
-    // Perform additional validation if needed
-    // For example, if it's a price task, validate against oracle
     let additionalValidation = true;
+    
     if (taskResult.symbol && taskResult.price) {
       const oracleData = await oracleService.getPrice(taskResult.symbol);
       const upperBound = oracleData.price * 1.05;
@@ -58,18 +49,41 @@ async function validateTaskAndGenerateProof(taskId, ipfsHash, agentId, signature
       }
     }
     
+    if (taskResult.agentId && taskResult.taskType) {
+      const agentJson = await redisClient.getStringKey(`agent:${taskResult.agentId}`);
+      if (agentJson) {
+        const agent = JSON.parse(agentJson);
+        
+        if (!agent.isActive) {
+          additionalValidation = false;
+          throw new Error("Agent is not active");
+        }
+        
+        if (agent.metadata && agent.metadata.supportedTaskTypes) {
+          const supportedTypes = Array.isArray(agent.metadata.supportedTaskTypes) 
+            ? agent.metadata.supportedTaskTypes 
+            : [agent.metadata.supportedTaskTypes];
+            
+          if (!supportedTypes.includes(taskResult.taskType)) {
+            additionalValidation = false;
+            throw new Error(`Agent does not support task type: ${taskResult.taskType}`);
+          }
+        }
+      } else {
+        console.warn(`Agent ${taskResult.agentId} not found in Redis`);
+      }
+    }
+    
     if (!additionalValidation) {
       throw new Error("Additional validation failed");
     }
     
-    // Generate EigenLayer proof
     const proofResult = await signatureValidator.generateEigenLayerProof(taskId, taskResult);
     
     if (!proofResult.success) {
       throw new Error("Failed to generate proof");
     }
     
-    // Update task status in Redis
     const taskJson = await redisClient.getStringKey(`task:${taskId}`);
     if (taskJson) {
       const task = JSON.parse(taskJson);
@@ -83,6 +97,14 @@ async function validateTaskAndGenerateProof(taskId, ipfsHash, agentId, signature
       };
       
       await redisClient.pushStringToRedisWithKey(`task:${taskId}`, JSON.stringify(task));
+      
+      if (task.assignedAgent && task.assignedAgent === agentId) {
+        try {
+          await updateWWANTaskStatus(taskId, proofResult.proof);
+        } catch (contractError) {
+          console.error(`Error updating WWAN contract: ${contractError.message}`);
+        }
+      }
     }
     
     return {
@@ -95,7 +117,6 @@ async function validateTaskAndGenerateProof(taskId, ipfsHash, agentId, signature
   } catch (error) {
     console.error(`Error validating task and generating proof: ${error.message}`);
     
-    // Update task status in Redis if task exists
     try {
       const taskJson = await redisClient.getStringKey(`task:${taskId}`);
       if (taskJson) {
@@ -121,7 +142,105 @@ async function validateTaskAndGenerateProof(taskId, ipfsHash, agentId, signature
   }
 }
 
+async function updateWWANTaskStatus(taskId, proof) {
+  try {
+    const provider = new ethers.JsonRpcProvider(wwanConfig.RPC_URL);
+    const wallet = new ethers.Wallet(wwanConfig.PRIVATE_KEY_PERFORMER, provider);
+    const wwanContract = new ethers.Contract(wwanConfig.WWAN_ADDRESS, wwanConfig.WWAN_ABI, wallet);
+    
+    console.log(`Updating WWAN contract for task ${taskId} with proof`);
+    
+    const tx = await wwanContract.completeTask(taskId, proof);
+    const receipt = await tx.wait();
+    
+    console.log(`WWAN contract updated successfully: ${tx.hash}`);
+    
+    return {
+      success: true,
+      transactionHash: tx.hash,
+      blockNumber: receipt.blockNumber
+    };
+  } catch (error) {
+    console.error(`Error updating WWAN contract: ${error.message}`);
+    throw error;
+  }
+}
+
+async function validateWWANAgentTask(taskId, agentId) {
+  try {
+    console.log(`Validating WWAN agent task ${taskId} for agent ${agentId}`);
+    
+    const taskJson = await redisClient.getStringKey(`task:${taskId}`);
+    if (!taskJson) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+    
+    const task = JSON.parse(taskJson);
+    
+    if (task.assignedAgent !== agentId) {
+      throw new Error(`Agent ${agentId} is not assigned to task ${taskId}`);
+    }
+    
+    const agentJson = await redisClient.getStringKey(`agent:${agentId}`);
+    if (!agentJson) {
+      throw new Error(`Agent ${agentId} not found`);
+    }
+    
+    const agent = JSON.parse(agentJson);
+    
+    let validationResult = true;
+    let validationDetails = {};
+    
+    if (task.taskType === 'price') {
+      if (task.taskData && task.taskData.symbol) {
+        const oracleData = await oracleService.getPrice(task.taskData.symbol);
+        validationDetails.oraclePrice = oracleData.price;
+        validationDetails.taskPrice = task.taskData.price;
+        
+        const upperBound = oracleData.price * 1.05;
+        const lowerBound = oracleData.price * 0.95;
+        
+        validationResult = (task.taskData.price <= upperBound && task.taskData.price >= lowerBound);
+      }
+    } else if (task.taskType === 'message') {
+      validationResult = true;
+    } else {
+      validationResult = true;
+    }
+    
+    task.validation = {
+      isValid: validationResult,
+      details: validationDetails,
+      timestamp: Date.now()
+    };
+    
+    if (validationResult) {
+      task.status = 'validated';
+    } else {
+      task.status = 'validation_failed';
+    }
+    
+    await redisClient.pushStringToRedisWithKey(`task:${taskId}`, JSON.stringify(task));
+    
+    return {
+      success: true,
+      taskId: taskId,
+      isValid: validationResult,
+      details: validationDetails
+    };
+  } catch (error) {
+    console.error(`Error validating WWAN agent task: ${error.message}`);
+    return {
+      success: false,
+      taskId: taskId,
+      error: error.message
+    };
+  }
+}
+
 module.exports = {
   validate,
-  validateTaskAndGenerateProof
+  validateTaskAndGenerateProof,
+  validateWWANAgentTask,
+  updateWWANTaskStatus
 };
