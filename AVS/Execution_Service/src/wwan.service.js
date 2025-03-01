@@ -146,10 +146,12 @@ async function getAgents() {
   try {
     const agentsList = await redisClient.getStringKey('agents:list') || '[]';
     const agentAddresses = JSON.parse(agentsList);
+    console.log(agentAddresses)
     
     const agents = [];
     for (const address of agentAddresses) {
       const agentJson = await redisClient.getStringKey(`agent:${address}`);
+      console.log(agentJson)
       if (agentJson) {
         agents.push(JSON.parse(agentJson));
       }
