@@ -1,6 +1,7 @@
-use ic_cdk::{update, query, storage};
+use ic_cdk::{update, query};
 use std::str::FromStr;
 use std::collections::HashMap;
+use std::cell::RefCell;
 use ic_cdk::export::candid::{CandidType, Deserialize};
 use types::{
     CanisterId, VetKDCurve, VetKDEncryptedKeyReply, VetKDEncryptedKeyRequest, VetKDKeyId,
@@ -11,9 +12,21 @@ mod types;
 
 const VETKD_SYSTEM_API_CANISTER_ID: &str = "s55qq-oqaaa-aaaaa-aaakq-cai";
 
-// Store agent secrets in stable memory
+// Store agent secrets in stable memory using RefCell
 thread_local! {
-    static AGENT_SECRETS: storage::Storage<HashMap<String, Vec<AgentSecret>>> = storage::Storage::init(HashMap::new());
+    static AGENT_SECRETS: RefCell<HashMap<String, Vec<AgentSecret>>> = RefCell::new(HashMap::new());
+}
+
+#[ic_cdk::pre_upgrade]
+fn pre_upgrade() {
+    let secrets = AGENT_SECRETS.with(|secrets| secrets.borrow().clone());
+    ic_cdk::storage::stable_save((secrets,)).expect("Failed to save state");
+}
+
+#[ic_cdk::post_upgrade]
+fn post_upgrade() {
+    let (secrets,): (HashMap<String, Vec<AgentSecret>>,) = ic_cdk::storage::stable_restore().expect("Failed to restore state");
+    AGENT_SECRETS.with(|state| *state.borrow_mut() = secrets);
 }
 
 #[update]
