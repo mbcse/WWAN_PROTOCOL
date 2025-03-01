@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import initializeAgent from './init-agent';
+import { parseMessage } from './init-agent';
 import { fetchMessages } from './init-agent';
 
 dotenv.config();
@@ -33,6 +33,11 @@ app.post('/chat', async (req: any, res: any) => {
         console.error('Error processing chat:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+app.post('/parse-message', async (req: any, res: any) => {
+    const agents = await parseMessage(req.body.message);
+    res.json(agents);
 });
 
 // Define port
