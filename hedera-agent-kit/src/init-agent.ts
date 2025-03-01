@@ -109,6 +109,8 @@ export const parseMessage = async (message: string) => {
 
     const combined = agents.data.map((agent: AgentType) => `${agent.metadata?.name} (${agent.address}): ${agent.metadata?.description}`).join(", ");
 
+    console.log("agents: ", combined)
+
     const systemMessage = `
     You are an analytical AI agent specialized in matching user queries to available AI agents.
 
