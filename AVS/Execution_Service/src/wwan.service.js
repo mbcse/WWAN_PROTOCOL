@@ -4,6 +4,9 @@ const { ethers } = require("ethers");
 const redisClient = require('../redis/redis.js');
 const wwanConfig = require('../configs/WWAN.config.js');
 const { getIpfsData, publishJSONToIpfs } = require('./dal.service.js');
+const { StoryClient } = require("@story-protocol/core-sdk");
+const { privateKeyToAccount } = require("viem/accounts");
+const { http } = require("viem");
 
 
 // Initialize Ethereum provider and contract
@@ -28,6 +31,11 @@ async function initEventListeners() {
       
       // Store agent in Redis
       await indexAgentInRedis(agentAddress, metadataContent);
+      try {
+        await mintAndRegisterAgent(metadataContent);
+      } catch (error) {
+        console.error(`Error minting and registering agent: ${error.message}`);
+      }
       
       console.log(`Agent ${agentAddress} indexed successfully`);
     } catch (error) {
@@ -856,6 +864,149 @@ async function registerAgentForUserOnChain(userId, agentId, allowance) {
   }
 }
 
+/**
+ * Mint an NFT and register it with Story Protocol
+ * @param {Object} metadata - The metadata for the IP asset
+ * @param {string} metadata.title - Title of the IP asset
+ * @param {string} metadata.description - Description of the IP asset
+ * @param {string} metadata.image - URL to the image
+ * @param {string} metadata.mediaUrl - URL to the media file (if applicable)
+ * @param {Array} metadata.creators - Array of creator objects with name, address, and contributionPercent
+ * @returns {Promise<Object>} - The result of the minting and registration
+ */
+async function mintAndRegisterAgent(metadata) {
+  try {
+    console.log('Starting mint and register process for agent...');
+    
+    // 1. Set up your IP Metadata
+    const ipMetadata = {
+      title: metadata.name || 'WWAN Agent',
+      description: metadata.description || 'An agent in the WWAN network',
+      createdAt: Math.floor(Date.now() / 1000).toString(),
+      creators: metadata.creators || [
+        {
+          name: 'WWAN Network',
+          address: wwanConfig.OPERATOR_ADDRESS,
+          contributionPercent: 10,
+        },
+      ],
+      image: metadata.image || 'https://ipfs.io/ipfs/QmUyARmq5RUXnZDpNaGhG6KkwaJc9ZvJgwHbpvkqLynDHi',
+      imageHash: metadata.imageHash || '0x0000000000000000000000000000000000000000000000000000000000000000',
+      mediaUrl: metadata.mediaUrl || '',
+      mediaHash: metadata.mediaHash || '0x0000000000000000000000000000000000000000000000000000000000000000',
+      mediaType: metadata.mediaType || 'application/json',
+      agentType: metadata.agentType || 'general',
+      capabilities: metadata.capabilities || ['messaging', 'task-execution'],
+      supportedTaskTypes: metadata.supportedTaskTypes || ['message', 'query', 'transaction'],
+    };
+
+    // 2. Set up your NFT Metadata
+    const nftMetadata = {
+      name: metadata.name || 'WWAN Agent',
+      description: metadata.description || 'An agent in the WWAN network. This NFT represents ownership of the IP Asset.',
+      image: metadata.imageUrl || 'https://ipfs.io/ipfs/QmUyARmq5RUXnZDpNaGhG6KkwaJc9ZvJgwHbpvkqLynDHi',
+      attributes: [
+        {
+          key: 'SkillS',
+          value: metadata.skillList || 'general',
+        },
+        {
+          key: 'Creator',
+          value: metadata.publickey || 'WWAN Network',
+        },
+        {
+          key: 'Creation Date',
+          value: new Date().toISOString(),
+        },
+        {
+          key: 'costPerCall',
+          value: metadata.costPerCall || 0
+        }
+      ],
+    };
+
+    // 3. Upload metadata to IPFS
+    console.log('Uploading metadata to IPFS...');
+    
+    // Use our existing IPFS service
+    const ipIpfsHash = await storeOnIPFS(ipMetadata);
+    console.log(`IP metadata uploaded to IPFS: ${ipIpfsHash}`);
+    
+    // Create hash of the IP metadata
+    const crypto = require('crypto');
+    const ipHash = crypto.createHash('sha256').update(JSON.stringify(ipMetadata)).digest('hex');
+    
+    // Upload NFT metadata to IPFS
+    const nftIpfsHash = await storeOnIPFS(nftMetadata);
+    console.log(`NFT metadata uploaded to IPFS: ${nftIpfsHash}`);
+    
+    // Create hash of the NFT metadata
+    const nftHash = crypto.createHash('sha256').update(JSON.stringify(nftMetadata)).digest('hex');
+
+    // 4. Use Story Protocol SDK to mint and register IP
+    console.log('Minting and registering IP with Story Protocol...');
+    
+    const privateKey = `0x${wwanConfig.PRIVATE_KEY_PERFORMER}`;
+    const account = privateKeyToAccount(privateKey);
+
+    const config = {
+      account: account,
+      transport: http(wwanConfig.STORY_RPC_PROVIDER_URL),
+      chainId: "aeneid",
+    };
+    
+    const client = StoryClient.newClient(config);
+
+    const response = await client.ipAsset.mintAndRegisterIp({
+      spgNftContract: wwanConfig.NFT_CONTRACT_ADDRESS,
+      allowDuplicates: true,
+      ipMetadata: {
+        ipMetadataURI: `https://ipfs.io/ipfs/${ipIpfsHash}`,
+        ipMetadataHash: `0x${ipHash}`,
+        nftMetadataURI: `https://ipfs.io/ipfs/${nftIpfsHash}`,
+        nftMetadataHash: `0x${nftHash}`,
+      },
+      txOptions: { waitForTransaction: true },
+    });
+    
+    console.log(`Root IPA created at transaction hash ${response.txHash}, IPA ID: ${response.ipId}`);
+    console.log(`View on the explorer: https://aeneid.explorer.story.foundation/ipa/${response.ipId}`);
+    
+    // Store the agent information in Redis
+    // await redisClient.pushStringToRedisWithKey(
+    //   `agent:${account.address}`,
+    //   JSON.stringify({
+    //     address: account.address,
+    //     tokenId: response.tokenId,
+    //     ipId: response.ipId,
+    //     ipMetadata: ipMetadata,
+    //     nftMetadata: nftMetadata,
+    //     ipfsHashes: {
+    //       ip: ipIpfsHash,
+    //       nft: nftIpfsHash
+    //     },
+    //     createdAt: Date.now()
+    //   })
+    // );
+    
+    return {
+      success: true,
+      agentAddress: account.address,
+      tokenId: response.tokenId,
+      ipId: response.ipId,
+      transactionHash: response.txHash,
+      ipfsHashes: {
+        ip: ipIpfsHash,
+        nft: nftIpfsHash
+      },
+      explorerUrl: `https://aeneid.explorer.story.foundation/ipa/${response.ipId}`
+    };
+  } catch (error) {
+    console.error(`Error in mintAndRegisterAgent: ${error.message}`);
+    throw error;
+  }
+}
+
 module.exports = {
   initialize,
   getAgents,
@@ -871,5 +1022,6 @@ module.exports = {
   getUserAgents,
   executeAgentTask,
   registerTask,
-  findBestAgentForTask
+  findBestAgentForTask,
+  mintAndRegisterAgent
 };
