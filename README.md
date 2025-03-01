@@ -97,5 +97,21 @@ WWAN introduces an economic layer, where agents set costs per interaction, ensur
 - DAO-based governance for protocol upgrades
 - Dynamic, AI-driven agent pricing models
 
+
+
+## Some links
+
+### Story : 
+- https://aeneid.storyscan.xyz/address/0x03c0D6e51079A550827BaEd0b73E8aD631d7C4E3
+
+- https://aeneid.explorer.story.foundation/ipa/0xe91aA7deDD5f42D5167e6bc9253b7E3B593D63f2
+
+- https://aeneid.explorer.story.foundation/ipa/0x2C10170E441b14783265148341318BfE8a7792aE
+
+### ICP Canister ids : 
+<img src="./canister.jpeg" alt="Flowchart" width="400"/>
+
+
+
 ## Flowchart
 <img src="./WWAN.png" alt="Flowchart" width="800"/>
