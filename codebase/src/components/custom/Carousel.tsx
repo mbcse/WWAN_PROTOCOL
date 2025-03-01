@@ -18,6 +18,7 @@ import speechService from '@/components/custom/TextToSpeech';
 import { useWallets } from '@privy-io/react-auth';
 import { getContractFunctions } from '@/web3';
 import { toast } from 'sonner';
+import { Agent } from '@/types';
 
 // Define types
 interface CardType {
@@ -31,8 +32,9 @@ interface CardType {
 }
 
 interface CardSelectorProps {
-  onSelect?: (selectedCards: CardType[]) => void;
+  onSelect?: (selectedCards: Agent[]) => void;
   onCancel?: () => void;
+  agents: Agent[];
   setShowAgents: (show: boolean) => void;
 }
 
@@ -73,14 +75,14 @@ const cards: CardType[] = [
   }
 ];
 
-const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setShowAgents }) => {
+const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setShowAgents, agents }) => {
   const [voices, setVoices] = useState<VoiceOption[]>([]);
   const [api, setApi] = useState<CarouselApi>()
   const { wallets } = useWallets();
 
-  const [selectedCardIds, setSelectedCardIds] = useState<number[]>([]);
+  const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
 
-  const toggleCardSelection = (id: number): void => {
+  const toggleCardSelection = (id: string): void => {
     setSelectedCardIds(prev => {
       if (prev.includes(id)) {
         return prev.filter(cardId => cardId !== id);
@@ -90,15 +92,15 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
     });
   };
 
-  const isCardSelected = (id: number): boolean => {
+  const isCardSelected = (id: string): boolean => {
     return selectedCardIds.includes(id);
   };
 
-  const getSelectedCards = (): CardType[] => {
-    return cards.filter(card => selectedCardIds.includes(card.id));
+  const getSelectedCards = (): Agent[] => {
+    return agents.filter(card => selectedCardIds.includes(card.address));
   };
 
-  const removeSelectedCard = (id: number): void => {
+  const removeSelectedCard = (id: string): void => {
     setSelectedCardIds(prev => prev.filter(cardId => cardId !== id));
   };
 
@@ -170,31 +172,31 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
 
           <Carousel className="w-full" setApi={setApi}>
             <CarouselContent>
-              {cards.map((card) => (
-                <CarouselItem key={card.id}>
+              {agents.map((agent) => (
+                <CarouselItem key={agent.address}>
                   <Card className="bg-white bg-opacity-70 backdrop-blur-sm border-0">
                     <CardContent className="flex p-4">
                       <div className="mr-4 flex-shrink-0">
                         <img
-                          src={card.image}
-                          alt={card.name}
+                          src={agent.metadata.imageUrl}
+                          alt={agent.metadata.name}
                           className="size-96 object-cover rounded-lg"
                         />
                       </div>
 
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
-                          <h3 className="text-xl font-semibold">{card.name}</h3>
-                          <Volume2 onClick={() => playAudio(card)} />
-                          <span className="font-bold text-green-600">{card.cost}</span>
+                          <h3 className="text-xl font-semibold">{agent.metadata.name}</h3>
+                          <Volume2 onClick={() => playAudio(agent)} />
+                          <span className="font-bold text-green-600">{agent.metadata.costPerCall}</span>
                         </div>
 
-                        <p className="text-gray-600 my-2">{card.description}</p>
+                        <p className="text-gray-600 my-2">{agent.metadata.description}</p>
 
                         <div className="mt-3">
                           <p className="text-sm font-medium text-gray-700 mb-1">Skills:</p>
                           <div className="flex flex-wrap gap-2">
-                            {card.skills.map((skill, index) => (
+                            {agent.metadata.skillList.map((skill, index) => (
                               <Badge key={index} variant="secondary" className="bg-blue-100 bg-opacity-80 text-blue-800 hover:bg-blue-200">
                                 {skill}
                               </Badge>
@@ -204,11 +206,11 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
 
                         <div className="mt-4">
                           <Button
-                            variant={isCardSelected(card.id) ? "destructive" : "default"}
+                            variant={isCardSelected(agent.address) ? "destructive" : "default"}
                             className="flex items-center"
-                            onClick={() => toggleCardSelection(card.id)}
+                            onClick={() => toggleCardSelection(agent.address)}
                           >
-                            {isCardSelected(card.id) ? (
+                            {isCardSelected(agent.address) ? (
                               <>
                                 <X size={16} className="mr-1" />
                                 Deselect
@@ -243,24 +245,24 @@ const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setSho
 
           {/* Selected cards section */}
           <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Selected Cards ({selectedCardIds.length})</h3>
+            <h3 className="text-lg font-semibold mb-2">Selected Agents ({selectedCardIds.length})</h3>
             <div className="max-h-32 overflow-y-auto">
               {getSelectedCards().length > 0 ? (
                 <div className="space-y-2">
                   {getSelectedCards().map(card => (
-                    <div key={card.id} className="flex items-center bg-blue-50 bg-opacity-70 p-2 rounded-lg">
+                    <div key={card.address} className="flex items-center bg-blue-50 bg-opacity-70 p-2 rounded-lg">
                       <img
-                        src={card.image}
-                        alt={card.name}
+                        src={card.metadata.imageUrl}
+                        alt={card.metadata.name}
                         className="w-10 h-10 rounded mr-2 object-cover"
                       />
                       <div className="flex-1">
-                        <p className="font-medium">{card.name}</p>
-                        <p className="text-sm text-gray-600">{card.cost}</p>
+                        <p className="font-medium">{card.metadata.name}</p>
+                        <p className="text-sm text-gray-600">{card.metadata.costPerCall}</p>
                       </div>
                       <button
                         className="p-1 rounded-full hover:bg-red-100"
-                        onClick={() => removeSelectedCard(card.id)}
+                        onClick={() => removeSelectedCard(card.address)}
                       >
                         <X size={16} className="text-red-600" />
                       </button>

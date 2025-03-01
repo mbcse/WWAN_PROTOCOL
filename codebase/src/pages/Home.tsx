@@ -1,24 +1,23 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, Search } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea"
-// import speechService from '@/components/custom/TextToSpeech';
 import AgentSelector from '@/components/custom/Carousel';
 import { parseMessage } from '@/services/index';
+import { Agent } from '@/types';
 
 const Homepage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showAgents, setShowAgents] = useState(false);
+    const [agents, setAgents] = useState<Agent[]>([]);
 
     const handleSearch = async () => {
         if (searchQuery.trim()) {
             console.log('Searching for:', searchQuery);
             setShowAgents(true);
             const data = await parseMessage(searchQuery);
-            console.log(data)
-            // speechService.speak(`${searchQuery}`, {
-            //     voiceName: 'Samantha'
-            // })
+            setAgents(data);
         }
     };
 
@@ -62,7 +61,7 @@ const Homepage = () => {
                     </div>
                 </div>
 
-                { showAgents && <AgentSelector setShowAgents={setShowAgents} />}
+                { showAgents && <AgentSelector agents={agents} setShowAgents={setShowAgents} />}
 
                 {/* Search Buttons */}
                 <div className="flex justify-center space-x-2 mt-6">
