@@ -2,25 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowUp, Search } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea"
-import speechService from '@/components/custom/TextToSpeech';
-import CardSelector from '@/components/custom/Carousel';
-
-interface VoiceOption {
-    gender: 'male' | 'female';
-    index: number;
-    name: string;
-  }
+// import speechService from '@/components/custom/TextToSpeech';
+import AgentSelector from '@/components/custom/Carousel';
+import { parseMessage } from '@/services/index';
 
 const Homepage = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [voices, setVoices] = useState<VoiceOption[]>([]);
+    const [showAgents, setShowAgents] = useState(false);
 
-    const handleSearch = () => {
+    const handleSearch = async () => {
         if (searchQuery.trim()) {
             console.log('Searching for:', searchQuery);
-            speechService.speak(`${searchQuery}`, {
-                voiceName: 'Samantha'
-            })
+            setShowAgents(true);
+            const data = await parseMessage(searchQuery);
+            console.log(data)
+            // speechService.speak(`${searchQuery}`, {
+            //     voiceName: 'Samantha'
+            // })
         }
     };
 
@@ -30,28 +28,10 @@ const Homepage = () => {
         }
     };
 
-    useEffect(() => {
-        speechService.initialize().then(() => {
-            const categories = speechService.getVoiceCategories();
-
-            // Create voice options from categories
-            const voiceOptions: VoiceOption[] = [];
-
-            categories.male.forEach((name, index) => {
-                voiceOptions.push({ gender: 'male', index, name });
-            });
-
-            categories.female.forEach((name, index) => {
-                voiceOptions.push({ gender: 'female', index, name });
-            });
-
-            setVoices(voiceOptions);
-        });
-    }, []);
-
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#1E1E1E] text-white">
             {/* Logo */}
+            {/* <img src="/wwan_header.png" alt="WWAN Logo" className="absolute top-0 left-0 opacity-80 h-screen z-0" /> */}
             <div className="mb-8">
                 <h1 className="text-3xl font-normal">
                     <span className='font-bold'>WWAN Protocol</span> -- Find your Agent
@@ -82,7 +62,7 @@ const Homepage = () => {
                     </div>
                 </div>
 
-                {/* <CardSelector /> */}
+                { showAgents && <AgentSelector setShowAgents={setShowAgents} />}
 
                 {/* Search Buttons */}
                 <div className="flex justify-center space-x-2 mt-6">

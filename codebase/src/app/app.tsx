@@ -2,7 +2,7 @@ import Navbar from '@/components/custom/Navbar';
 // import NxWelcome from './nx-welcome';
 import Homepage from '@/pages/Home';
 import { Toaster } from "@/components/ui/sonner"
-
+// import ChatPage from '@/components/custom/ChatPage';
 
 
 export function App() {
@@ -12,6 +12,7 @@ export function App() {
       <Navbar />
       {/* <NxWelcome title="codebase" /> */}
       <Homepage />
+      {/* <ChatPage /> */}
       <Toaster />
     </div>
   );

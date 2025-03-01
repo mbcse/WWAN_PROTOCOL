@@ -12,6 +12,7 @@
     "includedScripts": []
   },
   "dependencies": {
+    "@chatscope/chat-ui-kit-react": "^2.0.3",
     "@farcaster/frame-sdk": "^0.0.29",
     "@hookform/resolvers": "^4.1.2",
     "@okto_web3/react-sdk": "^0.2.1",

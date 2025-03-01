@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { Check, X } from 'lucide-react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from 'react';
+import { Check, X, Volume2 } from 'lucide-react';
 
 // Import shadcn components
 import {
   Carousel,
+  CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
@@ -12,6 +14,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import speechService from '@/components/custom/TextToSpeech';
 
 // Define types
 interface CardType {
@@ -21,41 +24,55 @@ interface CardType {
   skills: string[];
   cost: string;
   image: string;
+  voiceName?: string;
 }
 
 interface CardSelectorProps {
   onSelect?: (selectedCards: CardType[]) => void;
   onCancel?: () => void;
+  setShowAgents: (show: boolean) => void;
 }
 
-const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
-  // Sample card data
-  const cards: CardType[] = [
-    {
-      id: 1,
-      name: "Jane Cooper",
-      description: "Senior Developer with 5+ years of experience in React and Node.js",
-      skills: ["React", "Node.js", "TypeScript", "AWS"],
-      cost: "$120/hr",
-      image: "/agent1.png"
-    },
-    {
-      id: 2,
-      name: "Alex Morgan",
-      description: "UI/UX Designer specialized in mobile applications and design systems",
-      skills: ["Figma", "Adobe XD", "UI/UX", "Prototyping"],
-      cost: "$95/hr",
-      image: "/agent2.png"
-    },
-    {
-      id: 3,
-      name: "Michael Chen",
-      description: "Full-stack developer with expertise in cloud architecture",
-      skills: ["Python", "React", "AWS", "Docker"],
-      cost: "$110/hr",
-      image: "/agent3.png"
-    }
-  ];
+interface VoiceOption {
+  gender: 'male' | 'female';
+  index: number;
+  name: string;
+}
+
+// Sample card data
+const cards: CardType[] = [
+  {
+    id: 1,
+    name: "TradeMax",
+    description: "Advanced trading AI specialized in multi-chain cryptocurrency exchanges. Optimizes trade routes and timing for maximum returns.",
+    skills: ["Cross-chain Trading", "Price Analysis", "Risk Management", "MEV Protection"],
+    cost: "$0.05/trade",
+    voiceName: "Samantha",
+    image: "/agent1.png"
+  },
+  {
+    id: 2,
+    name: "SocialSense",
+    description: "AI community manager that monitors social sentiment, engages with users, and provides real-time market insights from social media trends.",
+    skills: ["Sentiment Analysis", "Community Management", "Trend Detection", "Crisis Management"],
+    cost: "$0.02/interaction",
+    voiceName: "Aaron",
+    image: "/agent2.png"
+  },
+  {
+    id: 3,
+    name: "SwapSage",
+    description: "Specialized in finding the most efficient token swap routes across DEXs. Monitors gas fees and slippage to ensure optimal exchanges.",
+    skills: ["DEX Aggregation", "Gas Optimization", "Slippage Control", "Route Finding"],
+    cost: "$0.03/swap",
+    voiceName: "Maria",
+    image: "/agent3.png"
+  }
+];
+
+const AgentSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel, setShowAgents }) => {
+  const [voices, setVoices] = useState<VoiceOption[]>([]);
+  const [api, setApi] = useState<CarouselApi>()
 
   const [selectedCardIds, setSelectedCardIds] = useState<number[]>([]);
 
@@ -82,46 +99,87 @@ const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
   };
 
   const handleConfirmSelection = (): void => {
+    setShowAgents(false);
     if (onSelect && selectedCardIds.length > 0) {
       onSelect(getSelectedCards());
     }
   };
 
   const handleCancel = (): void => {
+    setShowAgents(false);
     setSelectedCardIds([]);
     if (onCancel) {
       onCancel();
     }
   };
 
+  const playAudio = (card: any) => {
+    speechService.speak(`Hi I am ${card.name}. ${card.description}`, {
+      voiceName: card.voiceName
+    })
+  };
+
+  const initSpeech = () => {
+    const categories = speechService.getVoiceCategories();
+
+    // Create voice options from categories
+    const voiceOptions: VoiceOption[] = [];
+
+    categories.male.forEach((name, index) => {
+      voiceOptions.push({ gender: 'male', index, name });
+    });
+
+    categories.female.forEach((name, index) => {
+      voiceOptions.push({ gender: 'female', index, name });
+    });
+
+    setVoices(voiceOptions);
+  };
+
+  useEffect(() => {
+    initSpeech();
+  }, []);
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    api.on("slidesInView", () => {
+      // Do something on select.
+      console.log(api.slidesInView())
+    })
+  }, [api])
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white bg-opacity-90 backdrop-blur-md rounded-lg shadow-xl max-w-3xl w-full m-4">
+      <div className="bg-white bg-opacity-90 backdrop-blur-md rounded-lg shadow-xl max-w-3xl w-full m-4 text-black">
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-6 text-center">Select Agents</h2>
-          
-          <Carousel className="w-full">
+          <h2 className="text-2xl text-black font-bold mb-6 text-center">Select Agents</h2>
+
+          <Carousel className="w-full" setApi={setApi}>
             <CarouselContent>
               {cards.map((card) => (
                 <CarouselItem key={card.id}>
                   <Card className="bg-white bg-opacity-70 backdrop-blur-sm border-0">
                     <CardContent className="flex p-4">
                       <div className="mr-4 flex-shrink-0">
-                        <img 
-                          src={card.image} 
-                          alt={card.name} 
-                          className="size-96 object-cover rounded-lg" 
+                        <img
+                          src={card.image}
+                          alt={card.name}
+                          className="size-96 object-cover rounded-lg"
                         />
                       </div>
-                      
+
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
                           <h3 className="text-xl font-semibold">{card.name}</h3>
+                          <Volume2 onClick={() => playAudio(card)} />
                           <span className="font-bold text-green-600">{card.cost}</span>
                         </div>
-                        
+
                         <p className="text-gray-600 my-2">{card.description}</p>
-                        
+
                         <div className="mt-3">
                           <p className="text-sm font-medium text-gray-700 mb-1">Skills:</p>
                           <div className="flex flex-wrap gap-2">
@@ -132,7 +190,7 @@ const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
                             ))}
                           </div>
                         </div>
-                        
+
                         <div className="mt-4">
                           <Button
                             variant={isCardSelected(card.id) ? "destructive" : "default"}
@@ -162,8 +220,8 @@ const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
               <CarouselPrevious className="static transform-none mx-2" />
               <div className="flex space-x-1">
                 {cards.map((_, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`w-2 h-2 rounded-full ${index === 0 ? 'bg-blue-600' : 'bg-gray-300'}`}
                   />
                 ))}
@@ -180,16 +238,16 @@ const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
                 <div className="space-y-2">
                   {getSelectedCards().map(card => (
                     <div key={card.id} className="flex items-center bg-blue-50 bg-opacity-70 p-2 rounded-lg">
-                      <img 
-                        src={card.image} 
-                        alt={card.name} 
-                        className="w-10 h-10 rounded mr-2 object-cover" 
+                      <img
+                        src={card.image}
+                        alt={card.name}
+                        className="w-10 h-10 rounded mr-2 object-cover"
                       />
                       <div className="flex-1">
                         <p className="font-medium">{card.name}</p>
                         <p className="text-sm text-gray-600">{card.cost}</p>
                       </div>
-                      <button 
+                      <button
                         className="p-1 rounded-full hover:bg-red-100"
                         onClick={() => removeSelectedCard(card.id)}
                       >
@@ -204,17 +262,17 @@ const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gray-100 bg-opacity-70 backdrop-blur-sm px-6 py-4 rounded-b-lg">
           <div className="flex justify-end">
-            <Button 
+            <Button
               variant="outline"
               className="mr-2"
               onClick={handleCancel}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               variant="default"
               disabled={selectedCardIds.length === 0}
               onClick={handleConfirmSelection}
@@ -228,4 +286,4 @@ const CardSelector: React.FC<CardSelectorProps> = ({ onSelect, onCancel }) => {
   );
 };
 
-export default CardSelector;
+export default AgentSelector;
