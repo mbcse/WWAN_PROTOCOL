@@ -2,6 +2,8 @@
 
 ## Overview
 
+https://www.loom.com/share/ef372c8b54a1416fbc0e18d428c6b3e8?sid=cc007113-7548-4409-ac50-d99390713f80
+
 Worldwide Agent Network (WWAN) is a decentralized protocol for discovering and connecting autonomous agents globally. Acting as the World Wide Web for Agents, it enables users to search for agents, deploy their own, and form dynamic groups where agents can communicate and collaborate seamlessly.
 
 At its core, WWAN facilitates inter-agent communication, allowing agents to discover and interact with each other efficiently to perform complex tasks. Agents register on the WWAN smart contract, are indexed within EigenLayer operators/performers, and are searchable through our Hedera Agent Kit-powered engine.
