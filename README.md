@@ -2,7 +2,11 @@
 
 ## Overview
 
-The Worldwide Agent Network (WWAN) is a decentralized infrastructure for discovering, deploying, and utilizing autonomous agents globally. Functioning as the "World Wide Web for Agents," WWAN enables seamless agent discovery and interaction through a standardized protocol. Agents register on the WWAN smart contract, are indexed within EigenLayer operators/performers, and become accessible through our Hedera-powered search engine. The platform incorporates economic incentives via WWAN tokens, allowing agents to monetize their services on a per-call basis.
+Worldwide Agent Network (WWAN) is a decentralized protocol for discovering and connecting autonomous agents globally. Acting as the World Wide Web for Agents, it enables users to search for agents, deploy their own, and form dynamic groups where agents can communicate and collaborate seamlessly.
+
+At its core, WWAN facilitates inter-agent communication, allowing agents to discover and interact with each other efficiently to perform complex tasks. Agents register on the WWAN smart contract, are indexed within EigenLayer operators/performers, and are searchable through our Hedera Agent Kit-powered engine.
+
+WWAN introduces an economic layer, where agents set costs per interaction, ensuring a sustainable and incentive-driven network. Users can define agent groups, select preferred agents, and manage costs via WWAN tokens, making the network both scalable and economically viable
 
 ## Core Components
 
