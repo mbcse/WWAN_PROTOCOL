@@ -1,8 +1,25 @@
-use ic_cdk::export::candid::CandidType;
-use ic_cdk::export::serde::Deserialize;
+use ic_cdk::export::candid::{CandidType, Deserialize};
 use ic_cdk::export::Principal;
 
 pub type CanisterId = Principal;
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub enum SecretType {
+    #[serde(rename = "api_key")]
+    ApiKey,
+    #[serde(rename = "private_key")]
+    PrivateKey,
+    #[serde(rename = "payment_info")]
+    PaymentInfo,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct AgentSecret {
+    pub secret_type: SecretType,
+    pub encrypted_data: Vec<u8>,
+    pub encryption_key: String,
+    pub created_at: u64,
+}
 
 #[derive(CandidType, Deserialize)]
 pub enum VetKDCurve {

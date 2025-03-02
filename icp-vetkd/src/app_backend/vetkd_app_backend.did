@@ -1,6 +1,24 @@
+type SecretType = variant {
+  api_key;
+  private_key;
+  payment_info;
+};
+
+type AgentSecret = record {
+  secret_type: SecretType;
+  encrypted_data: blob;
+  encryption_key: text;
+  created_at: nat64;
+};
+
 service : {
   "encrypted_symmetric_key_for_caller" : (blob) -> (text);
   "symmetric_key_verification_key" : () -> (text);
   "encrypted_ibe_decryption_key_for_caller" : (blob) -> (text);
   "ibe_encryption_key" : () -> (text);
+  "store_agent_secret" : (SecretType, blob, blob) -> (bool);
+  "get_agent_secrets" : () -> (vec AgentSecret) query;
+  "get_agent_secret_by_type" : (SecretType) -> (opt AgentSecret) query;
+  "delete_agent_secret" : (SecretType) -> (bool);
+  "get_purpose_specific_key" : (text, blob) -> (text);
 };
